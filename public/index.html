@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags & SEO -->
+  <title>Aura3D Labs — Additive Precision &amp; 3D Digital Ecosystem</title>
+  <meta name="title" content="Aura3D Labs — Additive Precision &amp; 3D Digital Ecosystem">
+  <meta name="description" content="India's premier engineering studio for industrial CoreXY 3D printers, 16K stereolithography systems, carbon-fiber composite filaments, and genuine OEM spares. Official distributor with certified Pan-India dispatch.">
+  <meta name="keywords" content="3D printers India, CoreXY 3D printer, Bambu Lab India, Elegoo Jupiter 2 16K, Carbon Fiber PLA, high-speed 3D printing, 3D printer spares India, Aura3D Labs">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <meta name="author" content="Aura3D Labs">
+  <link rel="canonical" href="http://localhost:3000/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://localhost:3000/">
+  <meta property="og:title" content="Aura3D Labs — Additive Precision &amp; 3D Digital Ecosystem">
+  <meta property="og:description" content="Industrial Strength. Desktop Precision. Complete 3D printing ecosystem in India with official OEM warranties and same-day dispatch.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&h=630&q=80">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:site_name" content="Aura3D Labs">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="Aura3D Labs — Additive Precision &amp; 3D Digital Ecosystem">
+  <meta property="twitter:description" content="Explore India's high-performance 3D printing platform. Hardware, consumables, and factory spares.">
+  <meta property="twitter:image" content="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&h=630&q=80">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "http://localhost:3000/#organization",
+        "name": "Aura3D Labs",
+        "url": "http://localhost:3000/",
+        "description": "Authorized engineering distributor for Bambu Lab, Elegoo, Creality, and high-performance 3D printing materials in India."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "http://localhost:3000/#website",
+        "url": "http://localhost:3000/",
+        "name": "Aura3D Labs"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Subtle Film Grain Overlay -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- Clean Announcement Bar -->
+  <aside class="status-ticker" id="statusTicker">
+    <div class="editorial-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <span class="indicator"></span>
+        <span>PAN-INDIA EXPRESS DISPATCH &bull; ORDERS PLACED BEFORE 2:00 PM SHIP SAME-DAY</span>
+      </div>
+      <div style="display: flex; gap: 20px;">
+        <span>OFFICIAL OEM WARRANTY</span>
+        <span>GST INVOICE WITH 100% ITC</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Editorial Top Navigation -->
+  <header class="site-nav" id="siteNav">
+    <div class="editorial-container nav-wrapper">
+      <a href="/" class="nav-brand" aria-label="Aura3D Labs Home">
+        <span class="nav-brand-title">AURA3D<span>Labs</span></span>
+        <span class="nav-meta-coord">Additive Systems</span>
+      </a>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-menu">
+          <li><a href="#heroStage" class="nav-item-link active">Home</a></li>
+          <li><a href="#catalog" class="nav-item-link">Store</a></li>
+          <li><a href="/spares.html" class="nav-item-link">OEM Spares</a></li>
+          <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
+          <li><a href="#faq" class="nav-item-link">FAQ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20request%20technical%20assistance%20with%20systems%20or%20materials" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link" id="navWhatsappBtn">
+          Direct Desk
+        </a>
+
+        <button class="btn-nav-action cart-btn" onclick="openCartDrawer()" aria-label="Open Cart Drawer">
+          <span>Bag</span>
+          <span class="cart-badge cart-count-badge" style="display: none;">0</span>
+        </button>
+
+        <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Toggle Navigation Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Overlay Drawer -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop" onclick="if(event.target===this) closeMobileNav()">
+    <div class="mobile-nav-panel">
+      <div class="mobile-nav-header">
+        <span class="nav-brand-title">AURA3D<span>Labs</span></span>
+        <button class="close-btn" onclick="closeMobileNav()" aria-label="Close Navigation">&times;</button>
+      </div>
+      <ul class="mobile-nav-links">
+        <li><a href="/" onclick="closeMobileNav()">Home</a></li>
+        <li><a href="#catalog" onclick="closeMobileNav()">Store &amp; Catalog</a></li>
+        <li><a href="/spares.html" onclick="closeMobileNav()">OEM Spares Registry</a></li>
+        <li><a href="/guides.html" onclick="closeMobileNav()">Technical Guides</a></li>
+        <li><a href="#faq" onclick="closeMobileNav()">FAQ</a></li>
+      </ul>
+      <div class="mobile-nav-footer">
+        <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20request%20technical%20assistance%20with%20systems%20or%20materials" target="_blank" rel="noopener" class="btn-magnetic" style="width: 100%; justify-content: center;">
+          <span class="btn-dot"></span>
+          WhatsApp Technical Desk &rarr;
+        </a>
+        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-dim); margin-top: 16px; text-align: center;">
+          Pan-India Express Dispatch &bull; Official GST ITC Invoices
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main id="mainExperience">
+
+    <!-- Interactive 3D WebGL Hero Section (Asymmetrical Editorial Design) -->
+    <section class="hero-stage" id="heroStage">
+      <!-- 3D Three.js WebGL Container -->
+      <div class="webgl-canvas-container" id="webglHeroContainer">
+        <canvas id="webglHeroCanvas"></canvas>
+      </div>
+      <div class="hero-vignette" aria-hidden="true"></div>
+
+      <!-- Asymmetrical Editorial Foreground -->
+      <div class="editorial-container" style="position: relative; z-index: 5; width: 100%;">
+        <div class="hero-editorial-grid">
+          
+          <!-- Left Column: Striking Display Typography -->
+          <div class="hero-text-block">
+            <div class="hero-index-marker">
+              Next-Gen Additive Systems &bull; Precision Engineered
+            </div>
+
+            <h1 class="hero-headline">
+              Matter,<br>
+              <span class="italic-serif">Formed in Light.</span><br>
+              <span class="platinum-text">Precision Redefined.</span>
+            </h1>
+
+            <p class="hero-statement">
+              India's premier additive manufacturing destination uniting <strong>high-velocity CoreXY printers</strong>, <strong>16K monolithic resin systems</strong>, engineering filament composites, and a certified OEM spares inventory.
+            </p>
+
+            <div class="hero-interaction-cluster">
+              <a href="#catalog" class="btn-magnetic" id="btnExploreSpecs">
+                <span class="btn-dot"></span>
+                Explore Catalog &rarr;
+              </a>
+              <a href="/spares.html" class="btn-secondary-architectural" id="btnSparesRegistry">
+                OEM Spares Registry
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Catalog Showcase (Editorial Styling) -->
+    <section class="editorial-container" id="catalog" style="padding: 100px 0 60px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
+        <div>
+          <span class="editorial-section-tag">HARDWARE &amp; CONSUMABLES</span>
+          <h2 class="editorial-title" style="margin-top: 10px;">
+            The Product <span>Collection</span>
+          </h2>
+          <p style="color: var(--color-muted); font-size: 0.95rem; max-width: 540px; margin-top: 10px;">
+            Engineered hardware, precision reels, and certified factory components. Directly distributed with authentic warranties.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <input type="text" id="catalogSearch" class="select-styled" placeholder="Search products..." style="background: var(--color-graphite); border: 1px solid var(--border-hairline); color: #fff; padding: 10px 16px; border-radius: 2px; font-family: var(--font-mono); font-size: 0.8rem;" aria-label="Search Catalog">
+          <select id="catalogSort" class="select-styled" onchange="handleSort(this.value)" style="background: var(--color-graphite); border: 1px solid var(--border-hairline); color: #fff; padding: 10px 16px; border-radius: 2px; font-family: var(--font-mono); font-size: 0.8rem;" aria-label="Sort Catalog">
+            <option value="default">Sort: Default</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Rating: Highest</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="filter-bar" style="margin-bottom: 40px; border-bottom: 1px solid var(--border-hairline); padding-bottom: 16px;">
+        <div class="category-tabs" id="categoryTabs">
+          <button class="tab-btn active" data-category="all" onclick="filterCategory('all', this)" style="border-radius: 2px; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">All Items</button>
+          <button class="tab-btn" data-category="printers" onclick="filterCategory('printers', this)" style="border-radius: 2px; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">3D Printers</button>
+          <button class="tab-btn" data-category="filaments" onclick="filterCategory('filaments', this)" style="border-radius: 2px; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">Filaments</button>
+          <button class="tab-btn" data-category="resins" onclick="filterCategory('resins', this)" style="border-radius: 2px; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">UV Resins</button>
+          <button class="tab-btn" data-category="spares" onclick="filterCategory('spares', this)" style="border-radius: 2px; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">OEM Spares</button>
+          <button class="tab-btn" data-category="pens" onclick="filterCategory('pens', this)" style="border-radius: 2px; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">3D Pens</button>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="productsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Spares Registry Callout -->
+    <section class="editorial-container" style="padding: 60px 0;">
+      <div style="background: var(--color-graphite); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 48px; display: grid; grid-template-columns: 1.2fr 0.8fr; align-items: center; gap: 40px; box-shadow: var(--shadow-physical);">
+        <div>
+          <span class="editorial-section-tag">MAINTENANCE &amp; SUPPORT</span>
+          <h2 style="font-family: var(--font-display); font-size: 2rem; font-weight: 800; margin: 10px 0 14px; color: #fff;">
+            Zero Downtime Factory Spares
+          </h2>
+          <p style="color: var(--color-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 24px;">
+            Authorized factory replacement inventory for Elegoo Jupiter 2, Centauri Carbon, Mars 4 series, and Creality Ender machines. Micron-calibrated LCD screens, heated build surfaces, and hardened nozzles.
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <span style="font-family: var(--font-mono); font-size: 0.725rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); padding: 6px 12px; color: var(--color-titanium);">16K Mono Screens</span>
+            <span style="font-family: var(--font-mono); font-size: 0.725rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); padding: 6px 12px; color: var(--color-titanium);">Bi-Metal Hotends</span>
+            <span style="font-family: var(--font-mono); font-size: 0.725rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); padding: 6px 12px; color: var(--color-titanium);">PFA Release Films</span>
+            <span style="font-family: var(--font-mono); font-size: 0.725rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); padding: 6px 12px; color: var(--color-titanium);">Silent TMC2208 Motherboards</span>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <a href="/spares.html" class="btn-magnetic" style="display: inline-flex;">
+            <span class="btn-dot"></span>
+            Access Spares Registry &rarr;
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical FAQ Protocol -->
+    <section class="editorial-container" id="faq" style="padding: 60px 0 100px;">
+      <div style="margin-bottom: 40px;">
+        <span class="editorial-section-tag">CUSTOMER &amp; TECHNICAL SUPPORT</span>
+        <h2 class="editorial-title" style="margin-top: 10px;">Frequently Asked <span>Questions</span></h2>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item" open style="border-radius: 2px; border-color: var(--border-hairline);">
+          <summary class="faq-summary" style="font-family: var(--font-display); font-size: 1.05rem;">What distinguishes PLA+ from standard PLA formulations?</summary>
+          <div class="faq-answer" style="color: var(--color-muted);">
+            PLA+ incorporates macromolecular impact modifiers that improve mechanical toughness up to 5x. Layer bonding is noticeably stronger, spool brittleness is mitigated, and fluid melt characteristics permit sustained speeds up to 600 mm/s on high-acceleration CoreXY setups.
+          </div>
+        </details>
+
+        <details class="faq-item" style="border-radius: 2px; border-color: var(--border-hairline);">
+          <summary class="faq-summary" style="font-family: var(--font-display); font-size: 1.05rem;">Are GST tax invoices provided for institutional ITC claims?</summary>
+          <div class="faq-answer" style="color: var(--color-muted);">
+            Yes. Every order is issued with a fully compliant B2B GST tax invoice containing your official GSTIN, legal registered entity name, and HSN classifications (8477 for machinery, 3916 for filament polymers).
+          </div>
+        </details>
+
+        <details class="faq-item" style="border-radius: 2px; border-color: var(--border-hairline);">
+          <summary class="faq-summary" style="font-family: var(--font-display); font-size: 1.05rem;">What is the Pan-India express dispatch timeline?</summary>
+          <div class="faq-answer" style="color: var(--color-muted);">
+            Orders finalized before 14:00 IST on business days undergo automated batch dispatch that same afternoon via priority courier partners (Delhivery Air, BlueDart). Tier-1 metro destinations typically receive delivery within 24 to 48 hours.
+          </div>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Editorial Minimalist Footer -->
+  <footer style="border-top: 1px solid var(--border-hairline); background: var(--color-obsidian); padding: 60px 0 40px; font-size: 0.825rem; color: var(--color-muted);">
+    <div class="editorial-container" style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 24px;">
+      <div>
+        <div style="font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: #fff; margin-bottom: 8px;">
+          AURA3D<span style="font-family: var(--font-editorial); font-style: italic; color: var(--color-champagne-light); font-weight: 300;">Labs</span>
+        </div>
+        <p style="color: var(--color-dim); max-width: 400px; font-size: 0.775rem;">
+          Additive Manufacturing &bull; Precision Kinematics &bull; Certified Polymer Consumables &bull; OEM Spares Registry
+        </p>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-dim); display: flex; gap: 24px;">
+        <span>PAN-INDIA DISPATCH</span>
+        <span>100% GENUINE OEM</span>
+        <a href="/sitemap.xml" style="color: var(--color-muted); text-decoration: underline;">XML SITEMAP</a>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-dim);">
+        &copy; 2026 Aura3D Labs India. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Slide-Out Cart Drawer -->
+  <div class="cart-backdrop" id="cartBackdrop" onclick="if(event.target===this) closeCartDrawer()">
+    <div class="cart-drawer" id="cartDrawer" role="dialog" aria-label="Shopping Cart">
+      <div class="cart-header">
+        <h3 style="font-family: var(--font-display); font-weight: 800;">Shopping Bag</h3>
+        <button class="close-btn" onclick="closeCartDrawer()" aria-label="Close Bag">&times;</button>
+      </div>
+
+      <div class="cart-shipping-meter" id="cartShippingMeter">
+        <div id="meterText" style="font-family: var(--font-mono); font-size: 0.725rem;">Add items worth ₹1,499 for FREE Pan-India shipping</div>
+        <div class="meter-bar">
+          <div class="meter-fill" id="meterFill"></div>
+        </div>
+      </div>
+
+      <div class="cart-items" id="cartItemsList">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="cart-footer">
+        <div class="cart-summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">₹0</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>18% GST (Included)</span>
+          <span id="cartGst">₹0</span>
+        </div>
+        <div class="cart-summary-total">
+          <span>Total (Incl. Taxes)</span>
+          <span id="cartTotal">₹0</span>
+        </div>
+        <button class="btn-checkout" onclick="checkout()" id="cartCheckoutBtn">
+          Checkout (GST Tax Invoice) &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick View Modal -->
+  <div class="modal-backdrop" id="quickViewModal" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box" id="modalBox" role="dialog" aria-label="Product Specification Details">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close Modal">&times;</button>
+      <div id="quickViewBody"></div>
+    </div>
+  </div>
+
+  <!-- Three.js CDN and App Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="/js/canvas3d.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ultimate-filament-selection-guide",
+    "title": "The Ultimate 3D Printing Filament Selection Guide: PLA+, PETG, TPU & ABS",
+    "category": "Tutorial",
+    "readTime": "6 min read",
+    "snippet": "Learn which material to choose based on tensile strength, UV resistance, heat deflection, and ease of printing for your specific engineering project.",
+    "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+    "tags": ["Filaments", "PLA+", "PETG", "TPU"]
+  },
+  {
+    "id": "why-pla-plus-best-for-beginners",
+    "title": "Why PLA+ Filament is the Best Choice for Beginners in 3D Printing",
+    "category": "Guide",
+    "readTime": "4 min read",
+    "snippet": "Discover why PLA+ filament provides the perfect starting baseline, offering forgiving temperature windows, enhanced toughness, and zero warping.",
+    "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+    "tags": ["Beginners", "PLA+", "Printing Tips"]
+  },
+  {
+    "id": "resin-cleaning-water-washable-vs-standard",
+    "title": "Water-Washable vs Standard UV Resin: Cleaning, Strength & Costs Compared",
+    "category": "Deep Dive",
+    "readTime": "7 min read",
+    "snippet": "A comprehensive analysis of tap water washing versus isopropyl alcohol (IPA), curing times, tensile brittleness, and workshop safety.",
+    "image": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80",
+    "tags": ["Resins", "Post Processing", "Safety"]
+  },
+  {
+    "id": "3d-printer-spares-maintenance-checklist",
+    "title": "Essential 3D Printer Spares & Maintenance: Keep Your Machine at 100% Uptime",
+    "category": "Maintenance",
+    "readTime": "5 min read",
+    "snippet": "When to replace nozzles, lubricant protocols for linear rails, checking belt tensions, and prolonging mono LCD screen life.",
+    "image": "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=80",
+    "tags": ["Maintenance", "Spares", "Hardware"]
+  }
+]

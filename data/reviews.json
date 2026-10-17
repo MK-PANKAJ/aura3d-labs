@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "Rohan Shirodkar",
+    "role": "YouTuber & 3D Maker",
+    "rating": 5,
+    "review": "Exceptional flexibility and durability! The Aura3D TPU 1.75mm delivers outstanding elasticity without sacrificing strength. It smoothly feeds through my ELEGOO Neptune 4 Pro with zero jams, resulting in clean layer lines and vibrant color finishes.",
+    "product": "Aura3D Flexible TPU 95A",
+    "verified": true,
+    "avatar": "RS"
+  },
+  {
+    "id": 2,
+    "name": "Avtar Dohla",
+    "role": "Hardware Entrepreneur",
+    "rating": 5,
+    "review": "Purchased the Bambu Lab A1 Mini and several rolls of Carbon Fiber PLA for rapid prototyping. The Pan-India delivery reached Gurgaon within 24 hours with an official GST tax invoice. The team provided immediate guidance on slicer profiles.",
+    "product": "Bambu Lab A1 Mini + CF PLA",
+    "verified": true,
+    "avatar": "AD"
+  },
+  {
+    "id": 3,
+    "name": "Dr. Sameer Kulkarni",
+    "role": "Dental Prosthetics Specialist",
+    "rating": 5,
+    "review": "The Elegoo Dental Castable Resin is a game changer for our Mumbai clinic. Virtually zero ash residue during burnout, crisp margin lines, and zero thermal distortion. Truly genuine products with proper batch certifications.",
+    "product": "Elegoo Dental Castable Resin 1000g",
+    "verified": true,
+    "avatar": "SK"
+  },
+  {
+    "id": 4,
+    "name": "Pooja Venkat",
+    "role": "Architectural Visualizer",
+    "rating": 5,
+    "review": "Finding genuine replacement LCD screens and high-grade PFA films for our Saturn and Mars machines used to be a nightmare in India until now. Having all spares in stock with same-day dispatch saved our client project deadline!",
+    "product": "ELEGOO Metal Resin Tank + PFA Film",
+    "verified": true,
+    "avatar": "PV"
+  }
+]

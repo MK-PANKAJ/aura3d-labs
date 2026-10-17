@@ -1,0 +1,26 @@
+[
+  {
+    "q": "What is the difference between standard PLA and PLA+?",
+    "a": "PLA+ includes proprietary toughness modifiers and impact enhancers. While maintaining the easy-printing, odorless nature of standard PLA, PLA+ offers up to 5x higher impact resistance, better interlayer adhesion, reduced brittleness on the spool, and higher speed capability (up to 500-600 mm/s)."
+  },
+  {
+    "q": "Do you provide official GST Tax Invoices for businesses and institutions?",
+    "a": "Yes! All orders placed on our platform come with a 100% compliant B2B/B2C GST Tax Invoice with your GSTIN and business details printed, allowing you to claim full input tax credit (ITC)."
+  },
+  {
+    "q": "Are the 3D printers and spare parts 100% genuine with warranty?",
+    "a": "Yes. We are authorized direct distribution partners for Bambu Lab, Elegoo, Creality, Anycubic, Snapmaker, and Phrozen in India. Every printer includes an official 1-Year Manufacturer Warranty supported by our domestic technical engineers."
+  },
+  {
+    "q": "Can Water-Washable resin be rinsed straight into domestic sink drains?",
+    "a": "No, absolutely not. Although water-washable resin rinses clean with plain tap water without requiring isopropyl alcohol (IPA), the rinse water contains uncured photopolymers. It must be exposed to sunlight or UV to fully cure the particulate out, filtered, and then disposed of in accordance with local environmental regulations."
+  },
+  {
+    "q": "How fast do you dispatch orders across India?",
+    "a": "Orders placed before 2:00 PM IST on business days are dispatched on the same day via express air or road logistics (Delhivery, BlueDart, DTDC). Metro deliveries typically arrive within 24 to 48 hours."
+  },
+  {
+    "q": "How do I choose between 1.75mm and 2.85mm filament?",
+    "a": "Over 95% of modern desktop 3D printers (including Bambu Lab, Creality, Elegoo, Prusa, Anycubic, Snapmaker) use 1.75mm filament. 2.85mm filament is specifically intended for legacy Ultimaker and industrial dual-feeder setups."
+  }
+]
