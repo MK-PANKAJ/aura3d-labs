@@ -126,29 +126,35 @@
     <div class="editorial-container nav-wrapper">
       <a href="/" class="nav-brand" aria-label="Aura3D Labs Home">
         <span class="nav-brand-title">AURA3D<span>Labs</span></span>
-        <span class="nav-meta-coord">Customer Desk</span>
+        <span class="nav-meta-coord">Additive Systems</span>
       </a>
 
       <nav aria-label="Primary Navigation">
         <ul class="nav-menu">
-          <li><a href="/" class="nav-item-link">Store</a></li>
-          <li><a href="/spares.html" class="nav-item-link">OEM Spares</a></li>
-          <li><a href="/track.html" class="nav-item-link">Track Order</a></li>
-          <li><a href="/account.html" class="nav-item-link active">My Account</a></li>
+          <li><a href="/" class="nav-item-link">Home</a></li>
+          <li><a href="/#catalog" class="nav-item-link">Store</a></li>
+          <li><a href="/spares.html" class="nav-item-link">Spares</a></li>
+          <li><a href="/track.html" class="nav-item-link">Track</a></li>
           <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
+          <li><a href="/#faq" class="nav-item-link">FAQ</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20have%20an%20account%20inquiry" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link">
-          Direct Desk
+        <a href="/account.html" class="btn-nav-action" id="navAccountBtn" aria-label="Customer Account" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; border-color: var(--color-champagne); color: var(--color-champagne);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="navAccountLabel">Account</span>
         </a>
-        <a href="/?openCart=1" class="btn-nav-action cart-btn" aria-label="Shopping Bag" style="display: inline-flex; align-items: center; gap: 6px;">
+
+        <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20have%20an%20account%20inquiry" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Help
+        </a>
+
+        <a href="/" class="btn-nav-action" style="display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
           <span>Bag</span>
           <span class="cart-badge cart-count-badge" id="accountCartBadge" style="display: none;">0</span>
-        </a>
-        <a href="/" class="btn-nav-action">
-          Storefront ↗
         </a>
       </div>
     </div>
