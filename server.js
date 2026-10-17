@@ -28,20 +28,10 @@ if (fs.existsSync(envPath)) {
 
 const PORT = process.env.PORT || 3000;
 
-// Load Datasets Helper
+// Cloud Database & Local Datasets Helper
+const db = require('./services/firebase');
 const DATA_DIR = path.join(process.cwd(), 'data');
-function getProducts() {
-  return JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'products.json'), 'utf8'));
-}
-function saveProducts(products) {
-  try {
-    fs.writeFileSync(path.join(DATA_DIR, 'products.json'), JSON.stringify(products, null, 2), 'utf8');
-    return true;
-  } catch (err) {
-    console.error('Failed to write products.json to disk:', err);
-    return false;
-  }
-}
+
 function getReviews() {
   return JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'reviews.json'), 'utf8'));
 }
@@ -175,66 +165,82 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // API Routes
-app.get('/api/products', (req, res) => {
-  let filtered = getProducts();
-  const { category, brand, search, featured, sort } = req.query;
+app.get('/api/products', async (req, res) => {
+  try {
+    let filtered = await db.getAllProducts();
+    const { category, brand, search, featured, sort } = req.query;
 
-  if (category && category !== 'all') {
-    filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    if (category && category !== 'all') {
+      filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    }
+
+    if (brand && brand !== 'all') {
+      filtered = filtered.filter(p => p.brand.toLowerCase() === brand.toLowerCase());
+    }
+
+    if (featured === 'true') {
+      filtered = filtered.filter(p => p.featured);
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.brand.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q)
+      );
+    }
+
+    if (sort === 'price-low') {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sort === 'price-high') {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (sort === 'rating') {
+      filtered.sort((a, b) => b.rating - a.rating);
+    }
+
+    res.json({
+      total: filtered.length,
+      products: filtered
+    });
+  } catch (err) {
+    console.error('Error fetching products:', err);
+    res.status(500).json({ error: 'Failed to retrieve products' });
   }
-
-  if (brand && brand !== 'all') {
-    filtered = filtered.filter(p => p.brand.toLowerCase() === brand.toLowerCase());
-  }
-
-  if (featured === 'true') {
-    filtered = filtered.filter(p => p.featured);
-  }
-
-  if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.brand.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.type.toLowerCase().includes(q)
-    );
-  }
-
-  if (sort === 'price-low') {
-    filtered.sort((a, b) => a.price - b.price);
-  } else if (sort === 'price-high') {
-    filtered.sort((a, b) => b.price - a.price);
-  } else if (sort === 'rating') {
-    filtered.sort((a, b) => b.rating - a.rating);
-  }
-
-  res.json({
-    total: filtered.length,
-    products: filtered
-  });
 });
 
-app.get('/api/products/:id', (req, res) => {
-  const item = getProducts().find(p => p.id === req.params.id);
-  if (!item) {
-    return res.status(404).json({ error: 'Product not found' });
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const products = await db.getAllProducts();
+    const item = products.find(p => p.id === req.params.id);
+    if (!item) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    res.json(item);
+  } catch (err) {
+    console.error('Error fetching product:', err);
+    res.status(500).json({ error: 'Failed to retrieve product' });
   }
-  res.json(item);
 });
 
-app.get('/api/categories', (req, res) => {
-  const prods = getProducts();
-  const categories = [
-    { id: 'all', name: 'All Products', count: prods.length },
-    { id: 'printers', name: '3D Printers', count: prods.filter(p => p.category === 'printers').length },
-    { id: 'filaments', name: 'Filaments', count: prods.filter(p => p.category === 'filaments').length },
-    { id: 'resins', name: 'UV Resins', count: prods.filter(p => p.category === 'resins').length },
-    { id: 'spares', name: 'Spares & Upgrades', count: prods.filter(p => p.category === 'spares').length },
-    { id: 'pens', name: '3D Pens & Art', count: prods.filter(p => p.category === 'pens').length }
-  ];
-  res.json(categories);
+app.get('/api/categories', async (req, res) => {
+  try {
+    const prods = await db.getAllProducts();
+    const categories = [
+      { id: 'all', name: 'All Products', count: prods.length },
+      { id: 'printers', name: '3D Printers', count: prods.filter(p => p.category === 'printers').length },
+      { id: 'filaments', name: 'Filaments', count: prods.filter(p => p.category === 'filaments').length },
+      { id: 'resins', name: 'UV Resins', count: prods.filter(p => p.category === 'resins').length },
+      { id: 'spares', name: 'Spares & Upgrades', count: prods.filter(p => p.category === 'spares').length },
+      { id: 'pens', name: '3D Pens & Art', count: prods.filter(p => p.category === 'pens').length }
+    ];
+    res.json(categories);
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.status(500).json({ error: 'Failed to retrieve categories' });
+  }
 });
 
 app.get('/api/reviews', (req, res) => {
@@ -250,7 +256,7 @@ app.get('/api/faqs', (req, res) => {
 });
 
 // Dynamic SEO Sitemap
-app.get('/sitemap.xml', (req, res) => {
+app.get('/sitemap.xml', async (req, res) => {
   const host = req.protocol + '://' + req.get('host');
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -276,14 +282,19 @@ app.get('/sitemap.xml', (req, res) => {
   </url>
 `;
 
-  getProducts().forEach(p => {
-    xml += `  <url>
+  try {
+    const prods = await db.getAllProducts();
+    prods.forEach(p => {
+      xml += `  <url>
     <loc>${host}/catalog.html?product=${p.id}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 `;
-  });
+    });
+  } catch (e) {
+    // ignore
+  }
 
   xml += `</urlset>`;
   res.header('Content-Type', 'application/xml');
@@ -371,7 +382,7 @@ app.get('/api/admin/verify', verifyAdmin, (req, res) => {
 });
 
 // --- Secure Admin Product Management Routes ---
-app.post('/api/admin/products', verifyAdmin, (req, res) => {
+app.post('/api/admin/products', verifyAdmin, async (req, res) => {
   try {
     const {
       name,
@@ -412,7 +423,7 @@ app.post('/api/admin/products', verifyAdmin, (req, res) => {
     // Generate unique slug
     const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     let slug = baseSlug || 'product';
-    const products = getProducts();
+    const products = await db.getAllProducts();
     let counter = 1;
     while (products.some(p => p.id === slug)) {
       slug = `${baseSlug}-${counter++}`;
@@ -437,30 +448,30 @@ app.post('/api/admin/products', verifyAdmin, (req, res) => {
       description: description ? description.trim() : `High-precision authentic ${name} engineered for consistent additive manufacturing performance.`
     };
 
-    products.unshift(newProduct);
-    saveProducts(products);
+    const result = await db.createProduct(newProduct);
 
     res.status(201).json({
       success: true,
       message: 'Product successfully added to catalog',
-      product: newProduct
+      product: newProduct,
+      database: result.provider,
+      cloudSynced: result.cloudSuccess
     });
   } catch (err) {
     console.error('Error adding product:', err);
-    res.status(500).json({ success: false, error: 'Failed to persist product.' });
+    res.status(500).json({ success: false, error: 'Failed to persist product: ' + err.message });
   }
 });
 
 // Update Existing Product
-app.put('/api/admin/products/:id', verifyAdmin, (req, res) => {
+app.put('/api/admin/products/:id', verifyAdmin, async (req, res) => {
   try {
-    const products = getProducts();
-    const index = products.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
+    const products = await db.getAllProducts();
+    const existing = products.find(p => p.id === req.params.id);
+    if (!existing) {
       return res.status(404).json({ success: false, error: 'Product not found in registry.' });
     }
 
-    const existing = products[index];
     const {
       name,
       brand,
@@ -514,38 +525,65 @@ app.put('/api/admin/products/:id', verifyAdmin, (req, res) => {
       description: description ? description.trim() : existing.description
     };
 
-    products[index] = updatedProduct;
-    saveProducts(products);
+    const result = await db.updateProduct(req.params.id, updatedProduct);
 
     res.json({
       success: true,
       message: `Product "${updatedProduct.name}" updated successfully`,
-      product: updatedProduct
+      product: updatedProduct,
+      database: result.provider,
+      cloudSynced: result.cloudSuccess
     });
   } catch (err) {
     console.error('Error updating product:', err);
-    res.status(500).json({ success: false, error: 'Failed to update product.' });
+    res.status(500).json({ success: false, error: 'Failed to update product: ' + err.message });
   }
 });
 
-app.delete('/api/admin/products/:id', verifyAdmin, (req, res) => {
+// Delete Product
+app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
   try {
-    const products = getProducts();
-    const index = products.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
+    const products = await db.getAllProducts();
+    const existing = products.find(p => p.id === req.params.id);
+    if (!existing) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
-    const [removed] = products.splice(index, 1);
-    saveProducts(products);
+
+    const result = await db.deleteProduct(req.params.id);
 
     res.json({
       success: true,
-      message: `Product "${removed.name}" deleted successfully`,
-      deletedId: req.params.id
+      message: `Product "${existing.name}" deleted successfully`,
+      deletedId: req.params.id,
+      database: result.provider,
+      cloudSynced: result.cloudSuccess
     });
   } catch (err) {
     console.error('Error deleting product:', err);
-    res.status(500).json({ success: false, error: 'Failed to delete product.' });
+    res.status(500).json({ success: false, error: 'Failed to delete product: ' + err.message });
+  }
+});
+
+// Firebase Cloud Sync & Status Endpoints
+app.get('/api/admin/firebase/status', verifyAdmin, (req, res) => {
+  res.json({
+    success: true,
+    configured: db.isFirebaseConfigured(),
+    provider: db.getProviderType()
+  });
+});
+
+app.post('/api/admin/firebase/sync', verifyAdmin, async (req, res) => {
+  try {
+    const result = await db.seedCatalogToFirebase();
+    res.json({
+      success: true,
+      message: `Successfully seeded ${result.seededCount} products to ${result.provider}.`,
+      ...result
+    });
+  } catch (err) {
+    console.error('Firebase sync error:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

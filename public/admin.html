@@ -333,7 +333,11 @@
           </span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <span id="dbBadge" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-hairline); border-radius: 100px;">
+            <span id="dbDot" style="width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; display: inline-block;"></span>
+            <span id="dbText">DB: Initializing...</span>
+          </span>
           <span id="operatorBadge" style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-muted); display: flex; align-items: center; gap: 6px;">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; display: inline-block;"></span>
             OPERATOR: <strong id="operatorName" style="color: #fff;">admin</strong>
@@ -643,7 +647,30 @@
       document.getElementById('adminDashboard').style.display = 'block';
       const opNameEl = document.getElementById('operatorName');
       if (opNameEl) opNameEl.textContent = username;
+      checkDatabaseStatus();
       loadInventory();
+    }
+
+    async function checkDatabaseStatus() {
+      try {
+        const res = await fetch('/api/admin/firebase/status', {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const dot = document.getElementById('dbDot');
+        const txt = document.getElementById('dbText');
+        if (data.configured) {
+          if (dot) dot.style.background = '#38bdf8';
+          const name = data.provider === 'firestore' ? 'Firestore' : 'Realtime DB';
+          if (txt) txt.innerHTML = `☁️ DB: <strong style="color: #38bdf8;">${name} (Cloud)</strong>`;
+        } else {
+          if (dot) dot.style.background = '#fbbf24';
+          if (txt) txt.innerHTML = `📁 DB: <strong style="color: #fbbf24;">Local JSON</strong>`;
+        }
+      } catch (e) {
+        // ignore
+      }
     }
 
     async function handleLogin(e) {

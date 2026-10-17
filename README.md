@@ -39,8 +39,23 @@ ADMIN_USERNAME=your_admin_id
 
 # Master security key (recommended: 16+ characters)
 ADMIN_PASSWORD=your_super_strong_password
+
+# Optional: Persistent Cloud Database (Google Cloud Firestore / Firebase)
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_API_KEY=your-firebase-web-api-key
+# OR Realtime Database:
+# FIREBASE_DATABASE_URL=https://your-project-id-default-rtdb.firebaseio.com
 ```
 *(Reference: see `.env.example` in the project root)*
+
+### 🔥 Firebase Cloud Database Integration
+By default, the application runs with an automatic zero-config fallback to `data/products.json`.
+To persist products permanently across Vercel serverless cold-starts:
+1. Create a free project in [Firebase Console](https://console.firebase.google.com).
+2. Enable **Cloud Firestore** in test mode or production mode (Rules: allow read/write on `/products`).
+3. Copy your **Project ID** and **Web API Key** from *Project Settings &rarr; General*.
+4. Add `FIREBASE_PROJECT_ID` and `FIREBASE_API_KEY` to Vercel Environment Variables.
+5. In the Admin Terminal, items added, edited, or deleted will instantly and permanently sync to Firebase!
 
 ### 🛡️ Production Security Architecture:
 1. **Dual-Credential Verification:** Both Admin ID and Password are validated using constant-time cryptographic digests (`crypto.timingSafeEqual`) to eliminate timing-attack vulnerabilities.
