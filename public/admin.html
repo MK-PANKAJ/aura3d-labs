@@ -355,7 +355,7 @@
     <main class="editorial-container" style="padding: 40px 0 80px;">
       
       <!-- Metrics Overview -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 36px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 36px;">
         <div style="background: var(--color-graphite); border: 1px solid var(--border-hairline); padding: 20px; border-radius: 4px;">
           <span class="admin-label">Total Catalog</span>
           <div id="statTotal" style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #fff;">0</div>
@@ -372,12 +372,22 @@
           <span class="admin-label">OEM Spares</span>
           <div id="statSpares" style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #fff;">0</div>
         </div>
+        <div style="background: var(--color-graphite); border: 1px solid var(--border-hairline); padding: 20px; border-radius: 4px;">
+          <span class="admin-label">Customer Orders</span>
+          <div id="statOrders" style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #38bdf8;">0</div>
+        </div>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="admin-tabs">
         <button class="admin-tab-btn active" onclick="switchAdminTab('addTab', this)">+ Add New Product</button>
         <button class="admin-tab-btn" onclick="switchAdminTab('listTab', this)">Inventory Registry</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('ordersTab', this)">
+          📦 Orders &amp; Dispatch <span id="ordersCountBadge" style="display: none; background: #38bdf8; color: #000; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: 6px;">0</span>
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('reviewsTab', this)">
+          💬 Customer Reviews <span id="pendingReviewsBadge" style="display: none; background: #fbbf24; color: #000; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: 6px;">0</span>
+        </button>
       </div>
 
       <!-- TAB 1: ADD NEW PRODUCT FORM -->
@@ -471,6 +481,26 @@
                 </select>
               </div>
 
+              <!-- Rating & Reviews Override (Editable by Admin) -->
+              <div style="background: rgba(212, 175, 55, 0.04); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 4px; padding: 16px; margin-bottom: 20px;">
+                <span class="admin-label" style="color: var(--color-champagne); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  ★ Client-Facing Rating &amp; Review Metrics (Editable by Admin)
+                </span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div>
+                    <label class="admin-label" for="prodRating" style="font-size: 0.7rem;">Average Rating (1.0 - 5.0)</label>
+                    <input type="number" id="prodRating" class="admin-input" step="0.1" min="1.0" max="5.0" value="5.0" placeholder="4.9" oninput="updateLivePreview()">
+                  </div>
+                  <div>
+                    <label class="admin-label" for="prodReviewsCount" style="font-size: 0.7rem;">Reviews Count Displayed</label>
+                    <input type="number" id="prodReviewsCount" class="admin-input" step="1" min="0" value="1" placeholder="84" oninput="updateLivePreview()">
+                  </div>
+                </div>
+                <p style="font-size: 0.72rem; color: var(--color-muted); margin: 8px 0 0; line-height: 1.4;">
+                  Directly controls the star rating and total review tally shown to clients on product cards and detail views.
+                </p>
+              </div>
+
               <div class="admin-input-group">
                 <label class="admin-label" for="prodDescription">Product Description *</label>
                 <textarea id="prodDescription" class="admin-textarea" rows="4" placeholder="Detailed engineering monograph and functional specs..." required oninput="updateLivePreview()"></textarea>
@@ -496,6 +526,7 @@
                 <div style="text-align: left; padding: 4px;">
                   <span id="previewBrand" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne);">ELEGOO • FDM</span>
                   <div id="previewTitle" style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #fff; margin: 4px 0;">Product Title</div>
+                  <div id="previewRating" style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-champagne); margin-bottom: 4px;">★ 5.0 (1 review)</div>
                   <div style="font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: #fff;">
                     <span id="previewPrice">₹0</span>
                     <span id="previewOrig" style="font-size: 0.75rem; color: var(--color-dim); text-decoration: line-through; margin-left: 8px;"></span>
@@ -569,12 +600,161 @@
         </div>
       </section>
 
+      <!-- TAB 3: CUSTOMER REVIEWS MODERATION & MANAGEMENT -->
+      <section id="reviewsTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h2 style="font-family: var(--font-display); font-size: 1.35rem; color: #fff; margin: 0 0 4px;">
+              Customer Verified Reviews
+            </h2>
+            <p style="font-size: 0.825rem; color: var(--color-muted); margin: 0;">
+              Moderate customer reviews submitted after purchasing. Approved reviews appear on live product detail stages.
+            </p>
+          </div>
+          <button onclick="loadAdminReviews()" class="btn-nav-action" style="font-size: 0.725rem; padding: 6px 14px; background: rgba(255,255,255,0.04); border-color: var(--border-hairline); color: #fff; cursor: pointer;">
+            ⟳ Refresh Reviews
+          </button>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Customer / Reviewer</th>
+                <th>Target SKU &bull; Product</th>
+                <th>Rating</th>
+                <th>Monograph / Experience</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="reviewsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 4: ORDERS & DISPATCH MANAGEMENT -->
+      <section id="ordersTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h2 style="font-family: var(--font-display); font-size: 1.35rem; color: #fff; margin: 0 0 4px;">
+              Consignment &amp; Order Fulfillment
+            </h2>
+            <p style="font-size: 0.8rem; color: var(--color-muted); margin: 0;">
+              Moderate customer orders, issue BlueDart / Delhivery AWBs, update live dispatch states.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select id="adminOrderStatusFilter" class="admin-select" style="max-width: 170px;" onchange="filterAdminOrders()">
+              <option value="ALL">All Statuses</option>
+              <option value="PLACED">Placed / Confirmed</option>
+              <option value="PROCESSING">Processing / Packed</option>
+              <option value="DISPATCHED">Dispatched</option>
+              <option value="IN_TRANSIT">In Transit</option>
+              <option value="DELIVERED">Delivered</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+            <input type="text" id="adminOrderSearchInput" class="admin-input" placeholder="Search Order ID, Name, Phone..." style="max-width: 280px;" oninput="filterAdminOrders()">
+            <button onclick="loadAdminOrders()" class="btn-nav-action" style="padding: 10px 14px; font-size: 0.725rem;">
+              ↻ Refresh Orders
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order Ref &amp; Date</th>
+                <th>Recipient &amp; Delivery Destination</th>
+                <th>Manifest &amp; Amount</th>
+                <th>Payment Mode</th>
+                <th>Dispatch State</th>
+                <th>Courier &amp; AWB</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </main>
+  </div>
+
+  <!-- ORDER DISPATCH UPDATE MODAL -->
+  <div class="modal-backdrop" id="orderStatusModal" onclick="if(event.target===this) closeOrderStatusModal()">
+    <div class="modal-box" style="max-width: 540px;" role="dialog" aria-label="Update Order Dispatch Status">
+      <button class="modal-close" onclick="closeOrderStatusModal()" aria-label="Close Modal">&times;</button>
+      <div style="padding: 10px 4px;">
+        <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase;">
+          ● LOGISTICS TELEMETRY UPDATE
+        </span>
+        <h2 style="font-family: var(--font-display); font-size: 1.35rem; margin: 4px 0 16px; color: #fff;">
+          Update Dispatch: <span id="modalOrderRef" style="color: var(--color-champagne);"></span>
+        </h2>
+
+        <form id="orderStatusForm" onsubmit="saveOrderStatusUpdate(event)">
+          <input type="hidden" id="modalOrderId" value="">
+
+          <div style="margin-bottom: 14px;">
+            <label class="admin-label" for="modalStatusSelect">Consignment Status *</label>
+            <select id="modalStatusSelect" class="admin-select" required>
+              <option value="PLACED">PLACED - Order Confirmed &amp; In Queue</option>
+              <option value="PROCESSING">PROCESSING - Verified &amp; Packed at Hub</option>
+              <option value="DISPATCHED">DISPATCHED - Handed over to Courier</option>
+              <option value="IN_TRANSIT">IN_TRANSIT - In Transit / Out for Delivery</option>
+              <option value="DELIVERED">DELIVERED - Handed to Customer</option>
+              <option value="CANCELLED">CANCELLED - Order Terminated</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+            <div>
+              <label class="admin-label" for="modalCourierPartner">Courier Partner</label>
+              <select id="modalCourierPartner" class="admin-select">
+                <option value="BlueDart Express">BlueDart Express Air</option>
+                <option value="Delhivery Surface / Air">Delhivery Air</option>
+                <option value="DTDC Express">DTDC Express</option>
+                <option value="India Post Speed Post">India Post Speed Post</option>
+                <option value="Local Courier / Self">Direct Hub Courier</option>
+              </select>
+            </div>
+            <div>
+              <label class="admin-label" for="modalCourierAwb">Air Waybill (AWB #)</label>
+              <input type="text" id="modalCourierAwb" class="admin-input" placeholder="e.g. BD-78921004">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label class="admin-label" for="modalPaymentStatus">Payment Status</label>
+            <select id="modalPaymentStatus" class="admin-select">
+              <option value="PAID">PAID - Verified by Gateway / UPI</option>
+              <option value="PENDING">PENDING - Cash on Delivery / Unsettled</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <label class="admin-label" for="modalTimelineNote">Milestone Note (Publicly visible in customer tracking)</label>
+            <textarea id="modalTimelineNote" rows="3" class="admin-textarea" placeholder="e.g. Consignment processed at Whitefield sorting facility. Scheduled for delivery today."></textarea>
+          </div>
+
+          <button type="submit" id="btnSaveStatus" class="btn-magnetic" style="width: 100%; justify-content: center; padding: 14px;">
+            <span class="btn-dot"></span> Save &amp; Dispatch Update &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script>
     let adminToken = localStorage.getItem('aura3d_admin_token') || null;
     let allAdminProducts = [];
+    let allAdminOrders = [];
     let lockoutInterval = null;
 
     // Toggle password visibility
@@ -649,6 +829,8 @@
       if (opNameEl) opNameEl.textContent = username;
       checkDatabaseStatus();
       loadInventory();
+      loadAdminOrders();
+      loadAdminReviews();
     }
 
     async function checkDatabaseStatus() {
@@ -768,6 +950,14 @@
       if (btn) btn.classList.add('active');
       document.getElementById('addTab').style.display = tabId === 'addTab' ? 'block' : 'none';
       document.getElementById('listTab').style.display = tabId === 'listTab' ? 'block' : 'none';
+      document.getElementById('ordersTab').style.display = tabId === 'ordersTab' ? 'block' : 'none';
+      document.getElementById('reviewsTab').style.display = tabId === 'reviewsTab' ? 'block' : 'none';
+      if (tabId === 'ordersTab') {
+        loadAdminOrders();
+      }
+      if (tabId === 'reviewsTab') {
+        loadAdminReviews();
+      }
     }
 
     // Default Specifications Templates based on Category
@@ -835,11 +1025,18 @@
       const price = document.getElementById('prodPrice').value;
       const orig = document.getElementById('prodOrigPrice').value;
       const img = document.getElementById('prodImage').value;
+      const rating = document.getElementById('prodRating').value || '5.0';
+      const count = document.getElementById('prodReviewsCount').value || '1';
 
       document.getElementById('previewTitle').textContent = name;
       document.getElementById('previewBrand').textContent = `${brand.toUpperCase()} • ${type.toUpperCase()}`;
       document.getElementById('previewPrice').textContent = price ? `₹${parseFloat(price).toLocaleString('en-IN')}` : '₹0';
       document.getElementById('previewOrig').textContent = orig ? `₹${parseFloat(orig).toLocaleString('en-IN')}` : '';
+
+      const ratingEl = document.getElementById('previewRating');
+      if (ratingEl) {
+        ratingEl.textContent = `★ ${parseFloat(rating).toFixed(1)} (${count} review${count == 1 ? '' : 's'})`;
+      }
 
       const previewImgEl = document.getElementById('previewImg');
       const placeholder = document.getElementById('previewPlaceholder');
@@ -881,6 +1078,8 @@
       document.getElementById('prodBadge').value = p.badge || '';
       document.getElementById('prodDescription').value = p.description || '';
       document.getElementById('prodImage').value = p.image || '';
+      document.getElementById('prodRating').value = p.rating !== undefined ? p.rating : 5.0;
+      document.getElementById('prodReviewsCount').value = p.reviewsCount !== undefined ? p.reviewsCount : 1;
       document.getElementById('prodInStock').checked = p.inStock !== false;
       document.getElementById('prodFeatured').checked = Boolean(p.featured);
 
@@ -926,6 +1125,8 @@
       if (tabBtns[0]) tabBtns[0].textContent = '+ Add New Product';
 
       document.getElementById('addProductForm').reset();
+      document.getElementById('prodRating').value = '5.0';
+      document.getElementById('prodReviewsCount').value = '1';
       handleCategoryChange();
       updateLivePreview();
       switchAdminTab('listTab', tabBtns[1]);
@@ -959,6 +1160,8 @@
         badge: document.getElementById('prodBadge').value || null,
         description: document.getElementById('prodDescription').value.trim(),
         image: document.getElementById('prodImage').value.trim(),
+        rating: parseFloat(document.getElementById('prodRating').value) || 5.0,
+        reviewsCount: parseInt(document.getElementById('prodReviewsCount').value, 10) || 0,
         specs: specsObj,
         inStock: document.getElementById('prodInStock').checked,
         featured: document.getElementById('prodFeatured').checked
@@ -978,7 +1181,7 @@
         });
         const data = await res.json();
         if (data.success) {
-          alert(`Success! "${payload.name}" has been ${isEditing ? 'updated' : 'added to the catalog'}.`);
+          alert(`Success! "${payload.name}" has been ${isEditing ? 'updated' : 'added to the catalog'}. Client-facing rating set to ${payload.rating} ★.`);
           cancelEditMode();
           loadInventory();
         } else {
@@ -1095,6 +1298,363 @@
         alert('Server connectivity failure.');
       }
     }
-  </script>
+
+    // ==========================================================================
+    // CUSTOMER REVIEW MODERATION & MANAGEMENT
+    // ==========================================================================
+    let allAdminReviews = [];
+
+    async function loadAdminReviews() {
+      const tbody = document.getElementById('reviewsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--color-muted);">Retrieving customer verified reviews...</td></tr>`;
+
+      try {
+        const res = await fetch('/api/admin/reviews', {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const data = await res.json();
+        allAdminReviews = data.reviews || [];
+        renderReviewsTable(allAdminReviews);
+        updateReviewsBadge();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: #f87171;">Failed to load reviews from database.</td></tr>`;
+      }
+    }
+
+    function updateReviewsBadge() {
+      const pendingCount = allAdminReviews.filter(r => r.approved === false).length;
+      const badge = document.getElementById('pendingReviewsBadge');
+      if (badge) {
+        badge.textContent = `${pendingCount} PENDING`;
+        badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+      }
+    }
+
+    function renderReviewsTable(reviews) {
+      const tbody = document.getElementById('reviewsTableBody');
+      if (!tbody) return;
+
+      if (reviews.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 50px 20px; color: var(--color-muted);">
+              <div style="font-size: 1.1rem; color: #fff; margin-bottom: 6px;">No Customer Reviews Yet</div>
+              <p style="font-size: 0.85rem; margin: 0;">Verified reviews submitted by buyers on storefront product detail views will appear here for moderation.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = reviews.map(r => {
+        const isApproved = r.approved !== false;
+        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Verified';
+        return `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: var(--color-champagne); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem;">
+                  ${r.avatar || 'VB'}
+                </div>
+                <div>
+                  <strong style="color: #fff; font-size: 0.875rem; display: block;">${r.name || 'Anonymous Buyer'}</strong>
+                  <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);">
+                    ${r.orderRef ? `Order: ${r.orderRef}` : (r.role || 'Verified Customer')} &bull; ${dateStr}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-champagne); display: block;">
+                ${r.productId || 'SKU'}
+              </span>
+              <span style="font-size: 0.8rem; color: var(--color-titanium);">
+                ${r.product || r.productId || ''}
+              </span>
+            </td>
+            <td>
+              <span style="color: var(--color-champagne); font-size: 0.95rem; letter-spacing: 2px;">
+                ${'★'.repeat(r.rating || 5)}
+              </span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-muted); margin-left: 4px;">
+                ${Number(r.rating || 5).toFixed(1)}
+              </span>
+            </td>
+            <td style="max-width: 300px;">
+              <p style="font-size: 0.825rem; color: var(--color-titanium); line-height: 1.45; margin: 0; word-break: break-word;">
+                "${r.review || ''}"
+              </p>
+            </td>
+            <td>
+              ${isApproved ? 
+                `<span style="background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25); padding: 4px 8px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;">● APPROVED &amp; LIVE</span>` :
+                `<span style="background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); padding: 4px 8px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;">● PENDING MODERATION</span>`
+              }
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <div style="display: inline-flex; gap: 8px;">
+                <button onclick="toggleReviewApproval('${r.id}', ${isApproved})" style="background: ${isApproved ? 'rgba(239, 68, 68, 0.08)' : 'rgba(52, 211, 153, 0.1)'}; border: 1px solid ${isApproved ? 'rgba(239, 68, 68, 0.2)' : 'rgba(52, 211, 153, 0.3)'}; color: ${isApproved ? '#f87171' : '#34d399'}; padding: 6px 12px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer;">
+                  ${isApproved ? 'Revoke Approval' : '✓ Approve Review'}
+                </button>
+                <button onclick="deleteCustomerReview('${r.id}')" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-hairline); color: var(--color-muted); padding: 6px 10px; border-radius: 3px; font-size: 0.7rem; cursor: pointer;" title="Delete Review">
+                  ✕
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function toggleReviewApproval(id, currentlyApproved) {
+      try {
+        const res = await fetch(`/api/admin/reviews/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ approved: !currentlyApproved })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadAdminReviews();
+        } else {
+          alert('Error updating review status: ' + data.error);
+        }
+      } catch (err) {
+        alert('Failed to connect to backend server');
+      }
+    }
+
+    async function deleteCustomerReview(id) {
+      if (!confirm('Are you sure you want to permanently delete this customer review?')) return;
+      try {
+        const res = await fetch(`/api/admin/reviews/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadAdminReviews();
+        } else {
+          alert('Error deleting review: ' + data.error);
+        }
+      } catch (err) {
+        alert('Failed to connect to backend server');
+      }
+    }
+
+    /* ==========================================================================
+       Admin Orders & Consignment Dispatch Management
+       ========================================================================== */
+    async function loadAdminOrders() {
+      if (!adminToken) return;
+      try {
+        const res = await fetch('/api/admin/orders', {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        allAdminOrders = data.orders || [];
+        
+        // Update metric
+        const statOrdersEl = document.getElementById('statOrders');
+        if (statOrdersEl) statOrdersEl.textContent = allAdminOrders.length;
+        
+        updateOrdersBadge();
+        filterAdminOrders();
+      } catch (err) {
+        console.error('Failed to load admin orders:', err);
+      }
+    }
+
+    function updateOrdersBadge() {
+      const activeCount = allAdminOrders.filter(o => o.status !== 'DELIVERED' && o.status !== 'CANCELLED').length;
+      const badge = document.getElementById('ordersCountBadge');
+      if (badge) {
+        badge.textContent = `${activeCount} ACTIVE`;
+        badge.style.display = activeCount > 0 ? 'inline-block' : 'none';
+      }
+    }
+
+    function filterAdminOrders() {
+      const statusFilter = document.getElementById('adminOrderStatusFilter')?.value || 'ALL';
+      const searchVal = (document.getElementById('adminOrderSearchInput')?.value || '').trim().toLowerCase();
+
+      let filtered = [...allAdminOrders];
+      if (statusFilter !== 'ALL') {
+        filtered = filtered.filter(o => (o.status || '').toUpperCase() === statusFilter);
+      }
+
+      if (searchVal) {
+        filtered = filtered.filter(o => 
+          (o.id && o.id.toLowerCase().includes(searchVal)) ||
+          (o.customer && (
+            (o.customer.name && o.customer.name.toLowerCase().includes(searchVal)) ||
+            (o.customer.phone && o.customer.phone.includes(searchVal)) ||
+            (o.customer.city && o.customer.city.toLowerCase().includes(searchVal)) ||
+            (o.customer.gstin && o.customer.gstin.toLowerCase().includes(searchVal))
+          )) ||
+          (o.courier && o.courier.awb && o.courier.awb.toLowerCase().includes(searchVal))
+        );
+      }
+
+      renderOrdersTable(filtered);
+    }
+
+    function renderOrdersTable(orders) {
+      const tbody = document.getElementById('ordersTableBody');
+      if (!tbody) return;
+
+      if (orders.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 50px 20px; color: var(--color-muted);">
+              <div style="font-size: 1.1rem; color: #fff; margin-bottom: 6px;">No Matching Orders Found</div>
+              <p style="font-size: 0.85rem; margin: 0;">Incoming customer orders placed from the storefront checkout will populate here live.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = orders.map(ord => {
+        const dateStr = ord.createdAt ? new Date(ord.createdAt).toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : 'Logged';
+
+        const statusStyleMap = {
+          'PLACED': { bg: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: 'rgba(56, 189, 248, 0.3)' },
+          'PROCESSING': { bg: 'rgba(251, 191, 36, 0.12)', color: '#fbbf24', border: 'rgba(251, 191, 36, 0.3)' },
+          'DISPATCHED': { bg: 'rgba(168, 85, 247, 0.12)', color: '#c084fc', border: 'rgba(168, 85, 247, 0.3)' },
+          'IN_TRANSIT': { bg: 'rgba(249, 115, 22, 0.12)', color: '#fb923c', border: 'rgba(249, 115, 22, 0.3)' },
+          'DELIVERED': { bg: 'rgba(52, 211, 153, 0.12)', color: '#34d399', border: 'rgba(52, 211, 153, 0.3)' },
+          'CANCELLED': { bg: 'rgba(239, 68, 68, 0.12)', color: '#f87171', border: 'rgba(239, 68, 68, 0.3)' }
+        };
+
+        const st = statusStyleMap[ord.status] || statusStyleMap['PLACED'];
+
+        const cust = ord.customer || {};
+        const items = ord.items || [];
+        const itemsSummary = items.map(i => `${i.name} (x${i.qty})`).join(', ');
+
+        return `
+          <tr>
+            <td>
+              <strong style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-champagne); display: block;">${ord.id}</strong>
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted);">${dateStr}</span>
+            </td>
+            <td>
+              <strong style="color: #fff; font-size: 0.85rem; display: block;">${cust.name || 'Customer'}</strong>
+              <div style="font-size: 0.725rem; color: var(--color-titanium);">
+                ${cust.phone || ''} &bull; ${cust.city || ''}, ${cust.pincode || ''}
+              </div>
+              ${cust.gstin ? `<span style="font-family: var(--font-mono); font-size: 0.65rem; color: #38bdf8;">GSTIN: ${cust.gstin}</span>` : ''}
+            </td>
+            <td style="max-width: 240px;">
+              <span style="font-size: 0.775rem; color: var(--color-titanium); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${itemsSummary}">
+                ${itemsSummary}
+              </span>
+              <strong style="font-family: var(--font-mono); font-size: 0.85rem; color: #fff;">₹${(ord.total || 0).toLocaleString('en-IN')}</strong>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--color-muted);">(${items.length} SKUs)</span>
+            </td>
+            <td>
+              <span style="font-family: var(--font-mono); font-size: 0.725rem; color: #fff; display: block;">${ord.paymentMethod || 'Prepaid UPI'}</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; color: ${ord.paymentStatus === 'PAID' ? '#34d399' : '#fbbf24'};">
+                ● ${ord.paymentStatus || 'PAID'}
+              </span>
+            </td>
+            <td>
+              <span style="background: ${st.bg}; color: ${st.color}; border: 1px solid ${st.border}; padding: 4px 8px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; display: inline-block;">
+                ● ${ord.status}
+              </span>
+            </td>
+            <td>
+              <span style="font-size: 0.75rem; color: #fff; display: block;">${ord.courier ? ord.courier.partner : 'BlueDart'}</span>
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-champagne);">${ord.courier && ord.courier.awb ? ord.courier.awb : 'AWB PENDING'}</span>
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button onclick="openOrderStatusModal('${ord.id}')" style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); color: var(--color-champagne); padding: 6px 12px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer; transition: all 0.2s ease;">
+                Update Status ✎
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openOrderStatusModal(orderId) {
+      const order = allAdminOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      document.getElementById('modalOrderId').value = order.id;
+      document.getElementById('modalOrderRef').textContent = `${order.id} (${order.customer ? order.customer.name : ''})`;
+      document.getElementById('modalStatusSelect').value = order.status || 'PLACED';
+      document.getElementById('modalCourierPartner').value = (order.courier && order.courier.partner) ? order.courier.partner : 'BlueDart Express';
+      document.getElementById('modalCourierAwb').value = (order.courier && order.courier.awb && order.courier.awb !== 'PENDING-ALLOCATION') ? order.courier.awb : '';
+      document.getElementById('modalPaymentStatus').value = order.paymentStatus || 'PAID';
+      document.getElementById('modalTimelineNote').value = '';
+
+      const modal = document.getElementById('orderStatusModal');
+      if (modal) modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeOrderStatusModal() {
+      const modal = document.getElementById('orderStatusModal');
+      if (modal) modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    async function saveOrderStatusUpdate(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('modalOrderId').value;
+      const status = document.getElementById('modalStatusSelect').value;
+      const courierPartner = document.getElementById('modalCourierPartner').value;
+      const awb = document.getElementById('modalCourierAwb').value.trim();
+      const paymentStatus = document.getElementById('modalPaymentStatus').value;
+      const note = document.getElementById('modalTimelineNote').value.trim();
+      const btn = document.getElementById('btnSaveStatus');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-dot"></span> Transmitting Status...';
+      }
+
+      try {
+        const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({
+            status,
+            courierPartner,
+            awb,
+            paymentStatus,
+            note: note || `Order transitioned to ${status} by Aura3D Operations.`
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeOrderStatusModal();
+          loadAdminOrders();
+          alert(`Order ${orderId} updated to ${status} successfully.`);
+        } else {
+          alert('Failed to update order: ' + (data.error || 'Server rejected update'));
+        }
+      } catch (err) {
+        alert('Network error communicating with order fulfillment service.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="btn-dot"></span> Save &amp; Dispatch Update &rarr;';
+        }
+      }
+    }  </script>
 </body>
 </html>

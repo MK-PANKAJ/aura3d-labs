@@ -48,48 +48,66 @@
 
     // --- High-End Kinetic Sculpture: Additive Monolith ---
     const sculptureGroup = new THREE.Group();
-    // Shift slightly to right to balance asymmetrical editorial text on left
-    sculptureGroup.position.set(1.4, 0.1, 0);
+    sculptureGroup.position.set(1.5, 0.1, 0);
     scene.add(sculptureGroup);
 
-    // 1. Core Physical Geometry (Torus Knot with high radial segments)
-    const coreGeometry = new THREE.TorusKnotGeometry(1.45, 0.42, 180, 36, 2, 3);
-    const coreMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x1a1c24,
-      emissive: 0x050608,
-      roughness: 0.18,
-      metalness: 0.92,
-      clearcoat: 0.95,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.95
+    // 1. Core Physical Geometry (Torus Knot with radiant champagne titanium gold)
+    const coreGeometry = new THREE.TorusKnotGeometry(1.4, 0.38, 200, 40, 2, 3);
+    const coreMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
+      emissive: 0x221703,
+      roughness: 0.2,
+      metalness: 0.9
     });
     const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
     sculptureGroup.add(coreMesh);
 
-    // 2. Outer Wireframe Architectural Cage (Precision Galvanometer Grid)
-    const wireframeGeometry = new THREE.IcosahedronGeometry(2.35, 2);
-    const wireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xd4af37,
+    // 2. Inner Holographic Pulsing Core
+    const innerGeo = new THREE.IcosahedronGeometry(0.85, 2);
+    const innerMat = new THREE.MeshBasicMaterial({
+      color: 0x2dd4bf,
       wireframe: true,
       transparent: true,
-      opacity: 0.15
+      opacity: 0.45
+    });
+    const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+    sculptureGroup.add(innerMesh);
+
+    // 3. Outer Wireframe Architectural Cage (Precision Galvanometer Grid)
+    const wireframeGeometry = new THREE.IcosahedronGeometry(2.4, 2);
+    const wireframeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xf5deb3,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.28
     });
     const wireframeMesh = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
     sculptureGroup.add(wireframeMesh);
 
-    // 3. Orbiting Laser Ring (Visualizing Additive Slicing Plane)
-    const ringGeometry = new THREE.TorusGeometry(2.1, 0.015, 16, 100);
+    // 4. Primary Orbiting Laser Ring (Gold Slicing Plane)
+    const ringGeometry = new THREE.TorusGeometry(2.15, 0.02, 16, 120);
     const ringMaterial = new THREE.MeshBasicMaterial({
-      color: 0x2dd4bf,
+      color: 0xd4af37,
       transparent: true,
-      opacity: 0.55
+      opacity: 0.85
     });
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-    ringMesh.rotation.x = Math.PI / 2.3;
+    ringMesh.rotation.x = Math.PI / 2.2;
     sculptureGroup.add(ringMesh);
 
-    // 4. Volumetric Floating Particulate / Powder Bed Flecks
-    const particleCount = 750;
+    // 5. Secondary Counter-Orbiting Laser Ring (Cyan Precision Layer)
+    const ring2Geometry = new THREE.TorusGeometry(2.25, 0.015, 16, 120);
+    const ring2Material = new THREE.MeshBasicMaterial({
+      color: 0x2dd4bf,
+      transparent: true,
+      opacity: 0.75
+    });
+    const ring2Mesh = new THREE.Mesh(ring2Geometry, ring2Material);
+    ring2Mesh.rotation.y = Math.PI / 2.5;
+    sculptureGroup.add(ring2Mesh);
+
+    // 6. Volumetric Floating Particulate / Powder Bed Flecks
+    const particleCount = 800;
     const particleGeometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const scales = new Float32Array(particleCount);
@@ -104,31 +122,31 @@
 
     const particleMaterial = new THREE.PointsMaterial({
       color: 0xd4af37,
-      size: 0.035,
+      size: 0.045,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.65,
       blending: THREE.AdditiveBlending
     });
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particleSystem);
 
     // --- Dynamic Physically-Based Lighting ---
-    const ambientLight = new THREE.AmbientLight(0x181a24, 1.2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.6);
     scene.add(ambientLight);
 
-    // Cursor-Tracking Directional Key Light (Casts dynamic specular highlight)
-    const keyLight = new THREE.DirectionalLight(0xfffaed, 3.8);
-    keyLight.position.set(3, 4, 5);
+    // Cursor-Tracking Directional Key Light (Pure White Specular)
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 4.2);
+    keyLight.position.set(4, 5, 5);
     scene.add(keyLight);
 
-    // Dramatic Rim Light (Champagne Titanium sheen)
-    const rimLight = new THREE.DirectionalLight(0xd4af37, 2.8);
+    // Dramatic Rim Light (Golden Sheen)
+    const rimLight = new THREE.DirectionalLight(0xd4af37, 3.5);
     rimLight.position.set(-5, -2, -3);
     scene.add(rimLight);
 
-    // Subtle Cool Fill Light (Teal/Cyan laser tint)
-    const fillLight = new THREE.PointLight(0x2dd4bf, 1.6, 12);
-    fillLight.position.set(0, -3, 2);
+    // Cool Laser Fill Light (Teal/Cyan highlight)
+    const fillLight = new THREE.PointLight(0x2dd4bf, 2.5, 14);
+    fillLight.position.set(1.5, -2, 3);
     scene.add(fillLight);
 
     // --- Cursor & Inertia Physics ---
@@ -184,13 +202,13 @@
       const height = container.clientHeight;
       camera.aspect = width / height;
 
-      // Adjust camera distance for mobile
-      if (width < 768) {
-        camera.position.z = 9.5;
-        sculptureGroup.position.set(0, 0.4, 0); // Center on mobile
+      // Adjust camera distance for screen size
+      if (width < 992) {
+        camera.position.z = 8.5;
+        sculptureGroup.position.set(0, 0.5, 0); // Center on mobile
       } else {
-        camera.position.z = 7.5;
-        sculptureGroup.position.set(1.4, 0.1, 0); // Asymmetrical right offset
+        camera.position.z = 7.2;
+        sculptureGroup.position.set(2.2, 0.1, 0); // Framed clearly on the right
       }
 
       camera.updateProjectionMatrix();
@@ -226,8 +244,14 @@
       wireframeMesh.rotation.x = -elapsedTime * 0.15;
       wireframeMesh.rotation.y = elapsedTime * 0.18;
 
+      innerMesh.rotation.x = elapsedTime * 0.4;
+      innerMesh.rotation.z = -elapsedTime * 0.3;
+
       ringMesh.rotation.z = elapsedTime * 0.4;
       ringMesh.position.y = Math.sin(elapsedTime * 1.5) * 0.35;
+
+      ring2Mesh.rotation.x = -elapsedTime * 0.35;
+      ring2Mesh.position.y = Math.cos(elapsedTime * 1.5) * 0.3;
 
       // Dynamic Key Light tracks cursor
       keyLight.position.x = 3 + mouseX * 4;

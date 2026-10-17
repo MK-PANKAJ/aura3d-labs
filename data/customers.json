@@ -1,0 +1,62 @@
+[
+  {
+    "id": "cust-1",
+    "name": "Dr. Sameer Kulkarni",
+    "email": "dr.kulkarni@dentalsolutions.in",
+    "phone": "+91 98201 44521",
+    "password": "customer@2026",
+    "address": "Suite 402, Lotus Grandeur, Veera Desai Road",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400053",
+    "orders": [
+      "AUR-2026-8941"
+    ],
+    "createdAt": "2026-10-15T10:00:00Z"
+  },
+  {
+    "id": "cust-2",
+    "name": "Pooja Venkat",
+    "email": "pooja.venkat@archstudio.in",
+    "phone": "+91 97412 88390",
+    "password": "customer@2026",
+    "address": "Plot 12, Indiranagar 100ft Road",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560038",
+    "orders": [
+      "AUR-2026-9204"
+    ],
+    "createdAt": "2026-10-17T07:30:00Z"
+  },
+  {
+    "id": "cust-1792233717141",
+    "name": "Dev Test User",
+    "email": "test_1792233716082@aura3d.in",
+    "phone": "9876543210",
+    "password": "Password123",
+    "address": "Phase 2, Indiranagar",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560038",
+    "orders": [
+      "AUR-2026-6252"
+    ],
+    "createdAt": "2026-10-17T10:41:57.141Z"
+  },
+  {
+    "id": "cust-1792233737209",
+    "name": "Dev Test User",
+    "email": "test_1792233736316@aura3d.in",
+    "phone": "9876543210",
+    "password": "Password123",
+    "address": "Phase 2, Indiranagar",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560038",
+    "orders": [
+      "AUR-2026-2692"
+    ],
+    "createdAt": "2026-10-17T10:42:17.209Z"
+  }
+]

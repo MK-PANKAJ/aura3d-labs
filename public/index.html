@@ -94,12 +94,18 @@
           <li><a href="#heroStage" class="nav-item-link active">Home</a></li>
           <li><a href="#catalog" class="nav-item-link">Store</a></li>
           <li><a href="/spares.html" class="nav-item-link">OEM Spares</a></li>
+          <li><a href="javascript:void(0)" onclick="openTrackModal()" class="nav-item-link">Track Order</a></li>
           <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
           <li><a href="#faq" class="nav-item-link">FAQ</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
+        <button class="btn-nav-action" onclick="openCustomerModal()" id="navAccountBtn" aria-label="Customer Account Portal" style="display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="navAccountLabel">Account</span>
+        </button>
+
         <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20request%20technical%20assistance%20with%20systems%20or%20materials" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link" id="navWhatsappBtn">
           Direct Desk
         </a>
@@ -129,6 +135,8 @@
         <li><a href="/" onclick="closeMobileNav()">Home</a></li>
         <li><a href="#catalog" onclick="closeMobileNav()">Store &amp; Catalog</a></li>
         <li><a href="/spares.html" onclick="closeMobileNav()">OEM Spares Registry</a></li>
+        <li><a href="javascript:void(0)" onclick="closeMobileNav(); openTrackModal()">Track Live Order</a></li>
+        <li><a href="javascript:void(0)" onclick="closeMobileNav(); openCustomerModal()">My Customer Account</a></li>
         <li><a href="/guides.html" onclick="closeMobileNav()">Technical Guides</a></li>
         <li><a href="#faq" onclick="closeMobileNav()">FAQ</a></li>
       </ul>
@@ -357,6 +365,383 @@
     <div class="modal-box" id="modalBox" role="dialog" aria-label="Product Specification Details">
       <button class="modal-close" onclick="closeModal()" aria-label="Close Modal">&times;</button>
       <div id="quickViewBody"></div>
+    </div>
+  </div>
+
+  <!-- Customer Review Modal (Submit Feedback After Buying) -->
+  <div class="modal-backdrop" id="reviewModal" onclick="if(event.target===this) closeReviewModal()">
+    <div class="modal-box" style="max-width: 520px;" role="dialog" aria-label="Submit Customer Review">
+      <button class="modal-close" onclick="closeReviewModal()" aria-label="Close Review Modal">&times;</button>
+      <div style="padding: 10px 4px;">
+        <span style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase;">
+          ● VERIFIED BUYER FEEDBACK
+        </span>
+        <h2 id="reviewModalTitle" style="font-family: var(--font-display); font-size: 1.35rem; margin: 6px 0 16px; color: #fff;">
+          Review Your Item
+        </h2>
+        
+        <form id="customerReviewForm" onsubmit="submitCustomerReview(event)">
+          <input type="hidden" id="reviewProductId" value="">
+          
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-muted); margin-bottom: 8px;">
+              YOUR RATING (SELECT STARS) *
+            </label>
+            <div id="starPicker" style="display: flex; gap: 8px; font-size: 1.8rem; cursor: pointer;">
+              <span class="star-btn active" data-val="1" onclick="setReviewRating(1)">★</span>
+              <span class="star-btn active" data-val="2" onclick="setReviewRating(2)">★</span>
+              <span class="star-btn active" data-val="3" onclick="setReviewRating(3)">★</span>
+              <span class="star-btn active" data-val="4" onclick="setReviewRating(4)">★</span>
+              <span class="star-btn active" data-val="5" onclick="setReviewRating(5)">★</span>
+            </div>
+            <input type="hidden" id="reviewRatingInput" value="5">
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label for="reviewCustomerName" style="display: block; font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-muted); margin-bottom: 6px;">
+              FULL NAME *
+            </label>
+            <input type="text" id="reviewCustomerName" required placeholder="e.g. Vikramaditya Sharma" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label for="reviewOrderRef" style="display: block; font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-muted); margin-bottom: 6px;">
+              ORDER / INVOICE REF # (Optional)
+            </label>
+            <input type="text" id="reviewOrderRef" placeholder="e.g. AUR-2026-8941 or WhatsApp Order" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <label for="reviewComment" style="display: block; font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-muted); margin-bottom: 6px;">
+              YOUR EXPERIENCE &amp; PERFORMANCE MONOGRAPH *
+            </label>
+            <textarea id="reviewComment" required rows="4" placeholder="Detail your experience with layer consistency, delivery speed, or thermal performance..." class="admin-textarea" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;"></textarea>
+          </div>
+
+          <button type="submit" id="submitReviewBtn" class="btn-magnetic" style="width: 100%; justify-content: center;">
+            <span class="btn-dot"></span> Submit Verified Review
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL (GST Compliant E-Commerce Checkout) -->
+  <div class="modal-backdrop" id="checkoutModal" onclick="if(event.target===this) closeCheckoutModal()">
+    <div class="modal-box" style="max-width: 760px; max-height: 90vh; overflow-y: auto;" role="dialog" aria-label="Aura3D Secure Checkout">
+      <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Close Checkout">&times;</button>
+      
+      <!-- Checkout Form View -->
+      <div id="checkoutFormView">
+        <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border-hairline); padding-bottom: 14px;">
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.12em; text-transform: uppercase;">
+            ● ENCRYPTED 256-BIT DISPATCH CHECKOUT
+          </span>
+          <h2 style="font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin: 4px 0 0;">
+            Delivery &amp; Tax Invoice Details
+          </h2>
+        </div>
+
+        <form id="checkoutOrderForm" onsubmit="handlePlaceOrder(event)">
+          <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px;">
+            
+            <!-- Left: Shipping & Billing Details -->
+            <div>
+              <div id="checkoutUserWelcome" style="display: none; background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.25); border-radius: 4px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.775rem;">
+                Signed in as <strong id="checkoutLoggedInName" style="color: #fff;"></strong> &bull; Address auto-filled.
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">FULL NAME / RECIPIENT *</label>
+                <input type="text" id="chkName" required placeholder="e.g. Aditya Singhania" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">PHONE (SMS TRACKING) *</label>
+                  <input type="tel" id="chkPhone" required placeholder="+91 98765 43210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">EMAIL (INVOICE PDF) *</label>
+                  <input type="email" id="chkEmail" required placeholder="aditya@domain.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+                </div>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">STREET ADDRESS / LAB SUITE *</label>
+                <input type="text" id="chkAddress" required placeholder="Plot 42, Electronics Zone, Phase 1" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">CITY *</label>
+                  <input type="text" id="chkCity" required placeholder="Bengaluru" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">STATE *</label>
+                  <input type="text" id="chkState" required placeholder="Karnataka" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+                </div>
+                <div>
+                  <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">PINCODE *</label>
+                  <input type="text" id="chkPincode" required placeholder="560100" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">GSTIN (FOR B2B TAX CREDIT - OPTIONAL)</label>
+                <input type="text" id="chkGstin" placeholder="e.g. 29AAAAA0000A1Z5" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff; text-transform: uppercase;">
+              </div>
+
+              <!-- Payment Method Selection -->
+              <div style="margin-top: 18px;">
+                <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 8px;">PAYMENT METHOD *</label>
+                
+                <label class="payment-method-card selected" id="optUpi">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="chkPayment" value="Prepaid UPI / Card" checked onchange="selectPaymentMethod('upi')" style="accent-color: var(--color-champagne);">
+                    <div>
+                      <strong style="color: #fff; font-size: 0.85rem; display: block;">Instant UPI / NetBanking / Debit &amp; Credit Card</strong>
+                      <span style="font-size: 0.725rem; color: var(--color-muted);">Instant automated dispatch priority &amp; digital tax invoice</span>
+                    </div>
+                  </div>
+                  <span style="font-family: var(--font-mono); font-size: 0.7rem; color: #34d399; font-weight: 700;">FASTEST</span>
+                </label>
+
+                <label class="payment-method-card" id="optCod">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="chkPayment" value="Cash on Delivery" onchange="selectPaymentMethod('cod')" style="accent-color: var(--color-champagne);">
+                    <div>
+                      <strong style="color: #fff; font-size: 0.85rem; display: block;">Cash on Delivery (COD)</strong>
+                      <span style="font-size: 0.725rem; color: var(--color-muted);">Pay upon courier delivery at doorstep</span>
+                    </div>
+                  </div>
+                  <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted);">AVAILABLE</span>
+                </label>
+              </div>
+
+            </div>
+
+            <!-- Right: Order Items & Pricing Breakdown -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 18px; display: flex; flex-direction: column;">
+              <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; display: block;">
+                ORDER SUMMARY
+              </span>
+
+              <div id="checkoutItemsList" style="flex: 1; max-height: 220px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;">
+                <!-- Populated via JS -->
+              </div>
+
+              <div style="border-top: 1px solid var(--border-hairline); padding-top: 12px; font-size: 0.825rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--color-muted);">
+                  <span>Subtotal</span>
+                  <span id="chkSubtotal" style="color: #fff; font-family: var(--font-mono);">₹0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--color-muted);">
+                  <span>18% GST (Tax Invoice)</span>
+                  <span id="chkGst" style="color: #fff; font-family: var(--font-mono);">₹0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--color-muted);">
+                  <span>Pan-India Courier</span>
+                  <span id="chkShipping" style="color: #34d399; font-family: var(--font-mono); font-weight: 700;">FREE</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-hairline); padding-top: 10px; font-size: 1.05rem; font-weight: 700; color: #fff;">
+                  <span>Grand Total</span>
+                  <span id="chkTotal" style="color: var(--color-champagne); font-family: var(--font-mono);">₹0</span>
+                </div>
+              </div>
+
+              <button type="submit" id="btnPlaceOrder" class="btn-magnetic" style="width: 100%; justify-content: center; margin-top: 18px; padding: 14px;">
+                <span class="btn-dot"></span>
+                <span>Confirm &amp; Place Order &rarr;</span>
+              </button>
+
+              <div style="text-align: center; margin-top: 10px; font-family: var(--font-mono); font-size: 0.65rem; color: var(--color-dim);">
+                🔒 256-bit SSL &bull; Official OEM Manufacturer Warranty
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- Checkout Success View (Hidden initially) -->
+      <div id="checkoutSuccessView" style="display: none; text-align: center; padding: 30px 10px;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(52, 211, 153, 0.1); border: 2px solid #34d399; color: #34d399; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 18px;">
+          ✓
+        </div>
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #34d399; letter-spacing: 0.1em; text-transform: uppercase;">
+          ● ORDER CONFIRMED &amp; DISPATCH QUEUED
+        </span>
+        <h2 style="font-family: var(--font-display); font-size: 1.7rem; color: #fff; margin: 6px 0 10px;">
+          Thank You for Your Order!
+        </h2>
+        <p style="font-size: 0.9rem; color: var(--color-muted); max-width: 480px; margin: 0 auto 20px;">
+          Your order has been logged into our fulfillment hub. An official GST tax invoice with full ITC documentation has been generated.
+        </p>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 16px 24px; display: inline-block; margin-bottom: 24px;">
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); display: block; margin-bottom: 4px;">OFFICIAL ORDER REFERENCE ID</span>
+          <strong id="successOrderId" style="font-family: var(--font-mono); font-size: 1.4rem; color: var(--color-champagne); letter-spacing: 0.05em;">AUR-2026-XXXX</strong>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+          <button onclick="trackPlacedOrder()" class="btn-magnetic">
+            <span class="btn-dot"></span> Track Live Dispatch Status
+          </button>
+          <button onclick="closeCheckoutModal()" class="btn-nav-action" style="padding: 12px 20px;">
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LIVE ORDER TRACKING MODAL -->
+  <div class="modal-backdrop" id="trackOrderModal" onclick="if(event.target===this) closeTrackModal()">
+    <div class="modal-box" style="max-width: 680px; max-height: 90vh; overflow-y: auto;" role="dialog" aria-label="Aura3D Order Tracking Engine">
+      <button class="modal-close" onclick="closeTrackModal()" aria-label="Close Tracking Modal">&times;</button>
+      
+      <div style="margin-bottom: 20px;">
+        <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase;">
+          ● LIVE LOGISTICS TELEMETRY
+        </span>
+        <h2 style="font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin: 4px 0 10px;">
+          Track Consignment &amp; Dispatch
+        </h2>
+        <p style="font-size: 0.85rem; color: var(--color-muted); margin: 0;">
+          Enter your official Order ID (e.g. <code>AUR-2026-8941</code>) or registered mobile number.
+        </p>
+      </div>
+
+      <!-- Tracking Search Bar -->
+      <form onsubmit="handleTrackSearch(event)" style="display: flex; gap: 10px; margin-bottom: 24px;">
+        <input type="text" id="trackInputQuery" placeholder="Enter Order ID (AUR-2026-XXXX) or Phone..." required style="flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 12px 16px; color: #fff; font-family: var(--font-mono); font-size: 0.9rem;">
+        <button type="submit" id="btnTrackSearch" class="btn-magnetic" style="padding: 0 20px;">
+          <span class="btn-dot"></span> Track &rarr;
+        </button>
+      </form>
+
+      <!-- Tracking Result Container -->
+      <div id="trackingResultContainer" style="display: none;">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER ACCOUNT & ORDERS MODAL -->
+  <div class="modal-backdrop" id="customerModal" onclick="if(event.target===this) closeCustomerModal()">
+    <div class="modal-box" style="max-width: 640px; max-height: 90vh; overflow-y: auto;" role="dialog" aria-label="Customer Account Dashboard">
+      <button class="modal-close" onclick="closeCustomerModal()" aria-label="Close Account Modal">&times;</button>
+      
+      <!-- NOT SIGNED IN VIEW -->
+      <div id="customerAuthView">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.12em; text-transform: uppercase;">
+            ● AURA3D CLIENT DESK
+          </span>
+          <h2 style="font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin: 4px 0 6px;">
+            Customer Portal &amp; Orders
+          </h2>
+          <p style="font-size: 0.825rem; color: var(--color-muted); margin: 0;">
+            Sign in to track real-time dispatches, view GST invoices, and manage addresses.
+          </p>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tabCustomerLogin" onclick="switchCustomerAuthTab('login')">Sign In</button>
+          <button class="auth-tab-btn" id="tabCustomerRegister" onclick="switchCustomerAuthTab('register')">Create Account</button>
+        </div>
+
+        <!-- Customer Login Form -->
+        <form id="customerLoginForm" onsubmit="handleCustomerLogin(event)">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 6px;">EMAIL ADDRESS *</label>
+            <input type="email" id="custLoginEmail" required placeholder="name@domain.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 6px;">PASSWORD *</label>
+            <input type="password" id="custLoginPassword" required placeholder="••••••••••••" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+          <button type="submit" id="btnCustomerLogin" class="btn-magnetic" style="width: 100%; justify-content: center; padding: 14px;">
+            <span class="btn-dot"></span> Sign In to Customer Portal &rarr;
+          </button>
+        </form>
+
+        <!-- Customer Register Form (Hidden by default) -->
+        <form id="customerRegisterForm" style="display: none;" onsubmit="handleCustomerRegister(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">FULL NAME *</label>
+              <input type="text" id="custRegName" required placeholder="Aditya Singhania" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+            </div>
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">MOBILE NUMBER *</label>
+              <input type="tel" id="custRegPhone" required placeholder="+91 98765 43210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">EMAIL ADDRESS *</label>
+              <input type="email" id="custRegEmail" required placeholder="aditya@domain.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+            </div>
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">PASSWORD *</label>
+              <input type="password" id="custRegPassword" required placeholder="Min 6 characters" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">DEFAULT ADDRESS *</label>
+            <input type="text" id="custRegAddress" required placeholder="Lab Suite / Street" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">CITY *</label>
+              <input type="text" id="custRegCity" required placeholder="City" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+            </div>
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">STATE</label>
+              <input type="text" id="custRegState" placeholder="State" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+            </div>
+            <div>
+              <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">PINCODE *</label>
+              <input type="text" id="custRegPincode" required placeholder="560100" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+            </div>
+          </div>
+          <button type="submit" id="btnCustomerReg" class="btn-magnetic" style="width: 100%; justify-content: center; padding: 14px;">
+            <span class="btn-dot"></span> Create Account &amp; Proceed &rarr;
+          </button>
+        </form>
+      </div>
+
+      <!-- SIGNED IN CUSTOMER DASHBOARD VIEW (Hidden initially) -->
+      <div id="customerDashboardView" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-hairline); padding-bottom: 14px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase;">
+              ● VERIFIED CLIENT SESSION
+            </span>
+            <h2 id="custPortalName" style="font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 2px 0 0;">
+              Welcome Back
+            </h2>
+            <span id="custPortalEmail" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);"></span>
+          </div>
+          <button onclick="handleCustomerLogout()" class="btn-nav-action" style="padding: 6px 12px; font-size: 0.7rem; color: #f87171; border-color: rgba(239,68,68,0.2);">
+            Sign Out
+          </button>
+        </div>
+
+        <!-- Orders Section -->
+        <div>
+          <h3 style="font-family: var(--font-display); font-size: 1.15rem; color: #fff; margin: 0 0 12px;">
+            Your Orders &amp; Dispatches
+          </h3>
+          <div id="custOrdersList">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 

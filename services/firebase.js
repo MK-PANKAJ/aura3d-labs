@@ -339,6 +339,311 @@ async function seedCatalogToFirebase() {
   return { success: true, seededCount: seeded, provider: getProviderType() };
 }
 
+// -----------------------------------------------------------------------------
+// CUSTOMER REVIEWS CLOUD & LOCAL STORAGE
+// -----------------------------------------------------------------------------
+async function getAllReviews() {
+  if (PROJECT_ID) {
+    try {
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/reviews`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.documents && Array.isArray(data.documents)) {
+          const list = data.documents.map(fromFirestoreDoc).filter(Boolean);
+          if (list.length > 0) return list;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read reviews from Firestore:', e.message);
+    }
+  }
+
+  // Local fallback
+  try {
+    const raw = fs.readFileSync(path.join(DATA_DIR, 'reviews.json'), 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+}
+
+async function createReview(review) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const id = encodeURIComponent(String(review.id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/reviews/${id}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const body = { fields: toFirestoreFields(review) };
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to save review to Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'reviews.json'), 'utf8'));
+    list.unshift(review);
+    fs.writeFileSync(path.join(DATA_DIR, 'reviews.json'), JSON.stringify(list, null, 2), 'utf8');
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { review, cloudSuccess, provider: getProviderType() };
+}
+
+async function updateReview(id, updatedData) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const docId = encodeURIComponent(String(id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/reviews/${docId}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const body = { fields: toFirestoreFields(updatedData) };
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to update review in Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'reviews.json'), 'utf8'));
+    const idx = list.findIndex(r => String(r.id) === String(id));
+    if (idx !== -1) {
+      list[idx] = updatedData;
+      fs.writeFileSync(path.join(DATA_DIR, 'reviews.json'), JSON.stringify(list, null, 2), 'utf8');
+    }
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { review: updatedData, cloudSuccess, provider: getProviderType() };
+}
+
+async function deleteReview(id) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const docId = encodeURIComponent(String(id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/reviews/${docId}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const res = await fetch(url, { method: 'DELETE' });
+      if (res.ok || res.status === 404) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to delete review in Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'reviews.json'), 'utf8'));
+    const filtered = list.filter(r => String(r.id) !== String(id));
+    fs.writeFileSync(path.join(DATA_DIR, 'reviews.json'), JSON.stringify(filtered, null, 2), 'utf8');
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { success: true, cloudSuccess, provider: getProviderType() };
+}
+
+// -----------------------------------------------------------------------------
+// ORDERS CLOUD & LOCAL STORAGE
+// -----------------------------------------------------------------------------
+async function getAllOrders() {
+  if (PROJECT_ID) {
+    try {
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/orders`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.documents && Array.isArray(data.documents)) {
+          const list = data.documents.map(fromFirestoreDoc).filter(Boolean);
+          if (list.length > 0) return list;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read orders from Firestore:', e.message);
+    }
+  }
+
+  try {
+    const raw = fs.readFileSync(path.join(DATA_DIR, 'orders.json'), 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+}
+
+async function getOrderById(id) {
+  const orders = await getAllOrders();
+  return orders.find(o => String(o.id).toLowerCase() === String(id).toLowerCase().trim());
+}
+
+async function createOrder(order) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const id = encodeURIComponent(String(order.id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/orders/${id}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const body = { fields: toFirestoreFields(order) };
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to save order to Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'orders.json'), 'utf8'));
+    list.unshift(order);
+    fs.writeFileSync(path.join(DATA_DIR, 'orders.json'), JSON.stringify(list, null, 2), 'utf8');
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { order, cloudSuccess, provider: getProviderType() };
+}
+
+async function updateOrder(id, updatedData) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const docId = encodeURIComponent(String(id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/orders/${docId}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const body = { fields: toFirestoreFields(updatedData) };
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to update order in Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'orders.json'), 'utf8'));
+    const idx = list.findIndex(o => String(o.id).toLowerCase() === String(id).toLowerCase());
+    if (idx !== -1) {
+      list[idx] = updatedData;
+      fs.writeFileSync(path.join(DATA_DIR, 'orders.json'), JSON.stringify(list, null, 2), 'utf8');
+    }
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { order: updatedData, cloudSuccess, provider: getProviderType() };
+}
+
+// -----------------------------------------------------------------------------
+// CUSTOMERS CLOUD & LOCAL STORAGE
+// -----------------------------------------------------------------------------
+async function getAllCustomers() {
+  if (PROJECT_ID) {
+    try {
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/customers`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.documents && Array.isArray(data.documents)) {
+          const list = data.documents.map(fromFirestoreDoc).filter(Boolean);
+          if (list.length > 0) return list;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read customers from Firestore:', e.message);
+    }
+  }
+
+  try {
+    const raw = fs.readFileSync(path.join(DATA_DIR, 'customers.json'), 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+}
+
+async function getCustomerByEmail(email) {
+  const customers = await getAllCustomers();
+  return customers.find(c => String(c.email).toLowerCase().trim() === String(email).toLowerCase().trim());
+}
+
+async function createCustomer(customer) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const id = encodeURIComponent(String(customer.id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/customers/${id}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const body = { fields: toFirestoreFields(customer) };
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to save customer to Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'customers.json'), 'utf8'));
+    list.push(customer);
+    fs.writeFileSync(path.join(DATA_DIR, 'customers.json'), JSON.stringify(list, null, 2), 'utf8');
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { customer, cloudSuccess, provider: getProviderType() };
+}
+
+async function updateCustomer(id, updatedData) {
+  let cloudSuccess = false;
+  if (PROJECT_ID) {
+    try {
+      const docId = encodeURIComponent(String(id));
+      let url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/customers/${docId}`;
+      if (API_KEY) url += `?key=${API_KEY}`;
+      const body = { fields: toFirestoreFields(updatedData) };
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) cloudSuccess = true;
+    } catch (e) {
+      console.error('Failed to update customer in Firestore:', e.message);
+    }
+  }
+
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'customers.json'), 'utf8'));
+    const idx = list.findIndex(c => String(c.id) === String(id));
+    if (idx !== -1) {
+      list[idx] = updatedData;
+      fs.writeFileSync(path.join(DATA_DIR, 'customers.json'), JSON.stringify(list, null, 2), 'utf8');
+    }
+  } catch (e) {
+    if (!cloudSuccess) throw e;
+  }
+  return { customer: updatedData, cloudSuccess, provider: getProviderType() };
+}
+
 module.exports = {
   isFirebaseConfigured,
   getProviderType,
@@ -346,5 +651,17 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
-  seedCatalogToFirebase
+  seedCatalogToFirebase,
+  getAllReviews,
+  createReview,
+  updateReview,
+  deleteReview,
+  getAllOrders,
+  getOrderById,
+  createOrder,
+  updateOrder,
+  getAllCustomers,
+  getCustomerByEmail,
+  createCustomer,
+  updateCustomer
 };

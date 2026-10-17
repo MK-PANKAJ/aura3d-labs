@@ -243,8 +243,71 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-app.get('/api/reviews', (req, res) => {
-  res.json(getReviews());
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const list = await db.getAllReviews();
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load reviews' });
+  }
+});
+
+// Product-specific reviews
+app.get('/api/products/:id/reviews', async (req, res) => {
+  try {
+    const list = await db.getAllReviews();
+    const pid = req.params.id;
+    // Returns reviews matching this productId and marked approved (or all matching if approved field is unset)
+    const filtered = list.filter(r => (r.productId === pid || r.product === pid) && r.approved !== false);
+    res.json(filtered);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load product reviews' });
+  }
+});
+
+// Post a review after purchase (Customer Submission)
+app.post('/api/products/:id/reviews', async (req, res) => {
+  try {
+    const { name, rating, review, role, orderRef } = req.body || {};
+    if (!name || !review || rating === undefined) {
+      return res.status(400).json({ success: false, error: 'Name, rating (1-5), and review text are required.' });
+    }
+
+    const numRating = Math.max(1, Math.min(5, Math.round(Number(rating))));
+    if (isNaN(numRating)) {
+      return res.status(400).json({ success: false, error: 'Rating must be a number between 1 and 5.' });
+    }
+
+    const products = await db.getAllProducts();
+    const product = products.find(p => p.id === req.params.id);
+
+    const initials = name.trim().split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'VB';
+    const newReview = {
+      id: 'rev-' + Date.now(),
+      productId: req.params.id,
+      product: product ? product.name : req.params.id,
+      name: name.trim(),
+      role: role ? role.trim() : 'Verified Buyer',
+      rating: numRating,
+      review: review.trim(),
+      orderRef: orderRef ? String(orderRef).trim() : null,
+      verified: true,
+      approved: false, // Default: Pending admin moderation/approval
+      avatar: initials,
+      createdAt: new Date().toISOString()
+    };
+
+    const result = await db.createReview(newReview);
+    res.status(201).json({
+      success: true,
+      message: 'Review submitted successfully! It has been forwarded to store administrators for verification.',
+      review: newReview,
+      database: result.provider
+    });
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    res.status(500).json({ success: false, error: 'Failed to submit review: ' + err.message });
+  }
 });
 
 app.get('/api/guides', (req, res) => {
@@ -438,8 +501,8 @@ app.post('/api/admin/products', verifyAdmin, async (req, res) => {
       price: numPrice,
       originalPrice: numOrig || null,
       discount: discount || null,
-      rating: 5.0,
-      reviewsCount: 1,
+      rating: req.body.rating !== undefined && req.body.rating !== '' ? Math.max(1, Math.min(5, Number(req.body.rating))) : 5.0,
+      reviewsCount: req.body.reviewsCount !== undefined && req.body.reviewsCount !== '' ? Math.max(0, parseInt(req.body.reviewsCount, 10)) : 1,
       inStock: inStock !== false,
       featured: Boolean(featured),
       badge: badge ? badge.trim() : null,
@@ -463,7 +526,7 @@ app.post('/api/admin/products', verifyAdmin, async (req, res) => {
   }
 });
 
-// Update Existing Product
+// Update Existing Product (Allows admin to edit title, pricing, specs, and Client-Facing Average Rating)
 app.put('/api/admin/products/:id', verifyAdmin, async (req, res) => {
   try {
     const products = await db.getAllProducts();
@@ -484,7 +547,9 @@ app.put('/api/admin/products/:id', verifyAdmin, async (req, res) => {
       specs,
       description,
       featured,
-      inStock
+      inStock,
+      rating,
+      reviewsCount
     } = req.body;
 
     if (!name || !brand || !category || price === undefined || !image) {
@@ -517,6 +582,8 @@ app.put('/api/admin/products/:id', verifyAdmin, async (req, res) => {
       price: numPrice,
       originalPrice: numOrig || null,
       discount: discount || null,
+      rating: (rating !== undefined && rating !== null && rating !== '') ? Math.max(1, Math.min(5, Number(rating))) : (existing.rating || 5.0),
+      reviewsCount: (reviewsCount !== undefined && reviewsCount !== null && reviewsCount !== '') ? Math.max(0, parseInt(reviewsCount, 10)) : (existing.reviewsCount || 0),
       inStock: inStock !== false,
       featured: Boolean(featured),
       badge: badge ? badge.trim() : null,
@@ -564,6 +631,56 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
   }
 });
 
+// --- Secure Admin Review Moderation Routes ---
+app.get('/api/admin/reviews', verifyAdmin, async (req, res) => {
+  try {
+    const reviews = await db.getAllReviews();
+    res.json({ success: true, total: reviews.length, reviews });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to retrieve reviews' });
+  }
+});
+
+app.put('/api/admin/reviews/:id', verifyAdmin, async (req, res) => {
+  try {
+    const reviews = await db.getAllReviews();
+    const existing = reviews.find(r => String(r.id) === String(req.params.id));
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Review not found' });
+    }
+
+    const { approved, rating, review, name, role } = req.body;
+    const updated = {
+      ...existing,
+      approved: approved !== undefined ? Boolean(approved) : existing.approved,
+      rating: rating !== undefined ? Math.max(1, Math.min(5, Number(rating))) : existing.rating,
+      review: review !== undefined ? String(review).trim() : existing.review,
+      name: name !== undefined ? String(name).trim() : existing.name,
+      role: role !== undefined ? String(role).trim() : existing.role
+    };
+
+    const result = await db.updateReview(req.params.id, updated);
+    res.json({ success: true, message: 'Review updated successfully', review: updated, database: result.provider });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to update review: ' + err.message });
+  }
+});
+
+app.delete('/api/admin/reviews/:id', verifyAdmin, async (req, res) => {
+  try {
+    const reviews = await db.getAllReviews();
+    const existing = reviews.find(r => String(r.id) === String(req.params.id));
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Review not found' });
+    }
+
+    const result = await db.deleteReview(req.params.id);
+    res.json({ success: true, message: 'Review deleted successfully', deletedId: req.params.id, database: result.provider });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete review: ' + err.message });
+  }
+});
+
 // Firebase Cloud Sync & Status Endpoints
 app.get('/api/admin/firebase/status', verifyAdmin, (req, res) => {
   res.json({
@@ -584,6 +701,357 @@ app.post('/api/admin/firebase/sync', verifyAdmin, async (req, res) => {
   } catch (err) {
     console.error('Firebase sync error:', err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+// ==============================================================================
+// CUSTOMER PORTAL & AUTHENTICATION ENGINE
+// ==============================================================================
+const activeCustomerTokens = new Map(); // token -> { id, email, expiresAt }
+const CUSTOMER_SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 Days
+
+function verifyCustomer(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, error: 'Customer sign-in required' });
+  }
+  const token = authHeader.split(' ')[1];
+  const session = activeCustomerTokens.get(token);
+  if (!session || Date.now() > session.expiresAt) {
+    activeCustomerTokens.delete(token);
+    return res.status(401).json({ success: false, error: 'Session expired. Please log in again.' });
+  }
+  req.customerId = session.id;
+  req.customerEmail = session.email;
+  next();
+}
+
+// Register Customer
+app.post('/api/customer/register', async (req, res) => {
+  try {
+    const { name, email, phone, password, address, city, state, pincode } = req.body || {};
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, error: 'Name, email, and password are required.' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const existing = await db.getCustomerByEmail(cleanEmail);
+    if (existing) {
+      return res.status(409).json({ success: false, error: 'An account with this email already exists. Please sign in.' });
+    }
+
+    const newCustomer = {
+      id: 'cust-' + Date.now(),
+      name: name.trim(),
+      email: cleanEmail,
+      phone: (phone || '').trim(),
+      password: password.trim(), // In production, password hash is stored
+      address: (address || '').trim(),
+      city: (city || '').trim(),
+      state: (state || '').trim(),
+      pincode: (pincode || '').trim(),
+      orders: [],
+      createdAt: new Date().toISOString()
+    };
+
+    await db.createCustomer(newCustomer);
+
+    // Issue session token
+    const token = crypto.randomBytes(32).toString('hex');
+    activeCustomerTokens.set(token, {
+      id: newCustomer.id,
+      email: newCustomer.email,
+      expiresAt: Date.now() + CUSTOMER_SESSION_DURATION_MS
+    });
+
+    const { password: _, ...customerSafe } = newCustomer;
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully. Welcome to Aura3D Labs.',
+      token,
+      customer: customerSafe
+    });
+  } catch (err) {
+    console.error('Registration error:', err);
+    res.status(500).json({ success: false, error: 'Failed to create account: ' + err.message });
+  }
+});
+
+// Customer Sign In
+app.post('/api/customer/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Email and password are required.' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const customer = await db.getCustomerByEmail(cleanEmail);
+    if (!customer || customer.password !== password.trim()) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    activeCustomerTokens.set(token, {
+      id: customer.id,
+      email: customer.email,
+      expiresAt: Date.now() + CUSTOMER_SESSION_DURATION_MS
+    });
+
+    const { password: _, ...customerSafe } = customer;
+    res.json({
+      success: true,
+      message: 'Welcome back, ' + customer.name,
+      token,
+      customer: customerSafe
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, error: 'Sign in failed.' });
+  }
+});
+
+// Customer Profile & Order History
+app.get('/api/customer/me', verifyCustomer, async (req, res) => {
+  try {
+    const customers = await db.getAllCustomers();
+    const customer = customers.find(c => c.id === req.customerId);
+    if (!customer) {
+      return res.status(404).json({ success: false, error: 'Customer not found' });
+    }
+
+    const allOrders = await db.getAllOrders();
+    const myOrders = allOrders.filter(o => 
+      (o.customer && o.customer.email && o.customer.email.toLowerCase() === req.customerEmail.toLowerCase()) ||
+      (customer.orders && customer.orders.includes(o.id))
+    );
+
+    const { password: _, ...customerSafe } = customer;
+    res.json({
+      success: true,
+      customer: customerSafe,
+      orders: myOrders
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to retrieve customer profile' });
+  }
+});
+
+// Customer Profile Update
+app.put('/api/customer/profile', verifyCustomer, async (req, res) => {
+  try {
+    const customers = await db.getAllCustomers();
+    const customer = customers.find(c => c.id === req.customerId);
+    if (!customer) {
+      return res.status(404).json({ success: false, error: 'Customer not found' });
+    }
+
+    const { name, phone, address, city, state, pincode } = req.body || {};
+    const updated = {
+      ...customer,
+      name: name ? name.trim() : customer.name,
+      phone: phone ? phone.trim() : customer.phone,
+      address: address ? address.trim() : customer.address,
+      city: city ? city.trim() : customer.city,
+      state: state ? state.trim() : customer.state,
+      pincode: pincode ? pincode.trim() : customer.pincode
+    };
+
+    await db.updateCustomer(customer.id, updated);
+    const { password: _, ...customerSafe } = updated;
+    res.json({ success: true, message: 'Profile updated successfully', customer: customerSafe });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to update profile' });
+  }
+});
+
+// ==============================================================================
+// E-COMMERCE CHECKOUT & ORDER PLACEMENT
+// ==============================================================================
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { items, customer, paymentMethod, notes } = req.body || {};
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, error: 'Your bag is empty.' });
+    }
+    if (!customer || !customer.name || !customer.phone || !customer.address || !customer.city || !customer.pincode) {
+      return res.status(400).json({ success: false, error: 'Full delivery address, phone, and name are required.' });
+    }
+
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty || 1)), 0);
+    const gst = Math.round(subtotal * 0.18);
+    const shipping = subtotal >= 1499 ? 0 : 149;
+    const total = subtotal + gst + shipping;
+
+    const orderId = `AUR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const nowIso = new Date().toISOString();
+
+    const newOrder = {
+      id: orderId,
+      customer: {
+        name: customer.name.trim(),
+        email: (customer.email || '').toLowerCase().trim(),
+        phone: customer.phone.trim(),
+        address: customer.address.trim(),
+        city: customer.city.trim(),
+        state: (customer.state || 'Maharashtra').trim(),
+        pincode: customer.pincode.trim(),
+        gstin: customer.gstin ? customer.gstin.trim() : null
+      },
+      items: items.map(i => ({
+        id: i.id,
+        name: i.name,
+        price: Number(i.price),
+        qty: Number(i.qty || 1),
+        image: i.image
+      })),
+      subtotal,
+      gst,
+      shipping,
+      total,
+      status: 'PLACED',
+      paymentMethod: paymentMethod || 'Prepaid UPI / Card',
+      paymentStatus: paymentMethod === 'Cash on Delivery' ? 'PENDING' : 'PAID',
+      courier: {
+        partner: 'BlueDart / Delhivery Air',
+        awb: 'PENDING-ALLOCATION',
+        trackingUrl: ''
+      },
+      timeline: [
+        {
+          status: 'PLACED',
+          label: 'Order Confirmed & Placed',
+          timestamp: nowIso,
+          note: `Payment mode: ${paymentMethod || 'Prepaid UPI'}. GST Tax invoice registered with ITC.`
+        }
+      ],
+      notes: notes ? notes.trim() : '',
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+
+    const result = await db.createOrder(newOrder);
+
+    // If customer email exists in registered accounts, link order
+    if (newOrder.customer.email) {
+      try {
+        const cust = await db.getCustomerByEmail(newOrder.customer.email);
+        if (cust) {
+          cust.orders = cust.orders || [];
+          if (!cust.orders.includes(orderId)) {
+            cust.orders.push(orderId);
+            await db.updateCustomer(cust.id, cust);
+          }
+        }
+      } catch (e) {
+        // non-blocking
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Order placed successfully! Official Order ID: ' + orderId,
+      order: newOrder,
+      database: result.provider
+    });
+  } catch (err) {
+    console.error('Checkout error:', err);
+    res.status(500).json({ success: false, error: 'Checkout failed: ' + err.message });
+  }
+});
+
+// Public Order Tracking by Order ID or Phone Number
+app.get('/api/orders/track/:query', async (req, res) => {
+  try {
+    const rawQuery = req.params.query.trim().toLowerCase();
+    const orders = await db.getAllOrders();
+
+    // Match by Order ID or Phone
+    const matched = orders.filter(o => 
+      o.id.toLowerCase() === rawQuery ||
+      (o.customer && o.customer.phone && o.customer.phone.replace(/\D/g, '').endsWith(rawQuery.replace(/\D/g, '')))
+    );
+
+    if (matched.length === 0) {
+      return res.status(404).json({ success: false, error: 'No order found matching "' + req.params.query + '". Please verify your Order ID or Phone.' });
+    }
+
+    // Return the latest matching order or all matches
+    res.json({
+      success: true,
+      order: matched[0],
+      totalMatched: matched.length,
+      allOrders: matched
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Tracking service error' });
+  }
+});
+
+// ==============================================================================
+// SECURE ADMIN ORDER MANAGEMENT & DISPATCH TRACKING
+// ==============================================================================
+app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
+  try {
+    const orders = await db.getAllOrders();
+    res.json({ success: true, total: orders.length, orders });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to retrieve orders' });
+  }
+});
+
+app.put('/api/admin/orders/:id/status', verifyAdmin, async (req, res) => {
+  try {
+    const orders = await db.getAllOrders();
+    const existing = orders.find(o => o.id.toLowerCase() === req.params.id.toLowerCase());
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    const { status, courierPartner, awb, note, paymentStatus } = req.body || {};
+    const validStatuses = ['PLACED', 'PROCESSING', 'DISPATCHED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'];
+    const newStatus = status ? status.toUpperCase() : existing.status;
+
+    if (!validStatuses.includes(newStatus)) {
+      return res.status(400).json({ success: false, error: 'Invalid order status: ' + status });
+    }
+
+    const statusLabels = {
+      'PLACED': 'Order Confirmed',
+      'PROCESSING': 'Verified & Packed at Fulfillment Hub',
+      'DISPATCHED': 'Handed over to Courier Partner',
+      'IN_TRANSIT': 'In Transit (Out for Delivery)',
+      'DELIVERED': 'Successfully Delivered to Customer',
+      'CANCELLED': 'Order Cancelled'
+    };
+
+    const nowIso = new Date().toISOString();
+
+    existing.status = newStatus;
+    if (paymentStatus) existing.paymentStatus = paymentStatus;
+    if (courierPartner) existing.courier.partner = courierPartner;
+    if (awb) existing.courier.awb = awb;
+    existing.updatedAt = nowIso;
+
+    // Append to timeline
+    existing.timeline = existing.timeline || [];
+    existing.timeline.push({
+      status: newStatus,
+      label: statusLabels[newStatus] || newStatus,
+      timestamp: nowIso,
+      note: note ? note.trim() : `Order updated to ${newStatus} by Aura3D Operations.`
+    });
+
+    const result = await db.updateOrder(existing.id, existing);
+
+    res.json({
+      success: true,
+      message: `Order ${existing.id} updated to ${newStatus}`,
+      order: existing,
+      database: result.provider
+    });
+  } catch (err) {
+    console.error('Order status update error:', err);
+    res.status(500).json({ success: false, error: 'Failed to update order status: ' + err.message });
   }
 });
 

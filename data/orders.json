@@ -1,0 +1,201 @@
+[
+  {
+    "id": "AUR-2026-2692",
+    "customer": {
+      "name": "Dev Test User",
+      "email": "test_1792233736316@aura3d.in",
+      "phone": "9876543210",
+      "address": "Phase 2, Indiranagar",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "pincode": "560038",
+      "gstin": "29ABCDE1234F1Z5"
+    },
+    "items": [
+      {
+        "id": "bambu-p1s-combo",
+        "name": "Bambu Lab P1S Combo Multi-Color 3D Printer",
+        "price": 84999,
+        "qty": 1
+      }
+    ],
+    "subtotal": 84999,
+    "gst": 15300,
+    "shipping": 0,
+    "total": 100299,
+    "status": "DISPATCHED",
+    "paymentMethod": "Prepaid UPI / Card",
+    "paymentStatus": "PAID",
+    "courier": {
+      "partner": "BlueDart Express Air",
+      "awb": "BD-88991234",
+      "trackingUrl": ""
+    },
+    "timeline": [
+      {
+        "status": "PLACED",
+        "label": "Order Confirmed & Placed",
+        "timestamp": "2026-10-17T10:42:18.143Z",
+        "note": "Payment mode: Prepaid UPI / Card. GST Tax invoice registered with ITC."
+      },
+      {
+        "status": "DISPATCHED",
+        "label": "Handed over to Courier Partner",
+        "timestamp": "2026-10-17T10:42:19.354Z",
+        "note": "Air shipment manifested and dispatched from Bengaluru fulfillment center."
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-10-17T10:42:18.143Z",
+    "updatedAt": "2026-10-17T10:42:19.354Z"
+  },
+  {
+    "id": "AUR-2026-6252",
+    "customer": {
+      "name": "Dev Test User",
+      "email": "test_1792233716082@aura3d.in",
+      "phone": "9876543210",
+      "address": "Phase 2, Indiranagar",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "pincode": "560038",
+      "gstin": "29ABCDE1234F1Z5"
+    },
+    "items": [
+      {
+        "id": "bambu-p1s-combo",
+        "name": "Bambu Lab P1S Combo Multi-Color 3D Printer",
+        "price": 84999,
+        "qty": 1
+      }
+    ],
+    "subtotal": 84999,
+    "gst": 15300,
+    "shipping": 0,
+    "total": 100299,
+    "status": "PLACED",
+    "paymentMethod": "Prepaid UPI / Card",
+    "paymentStatus": "PAID",
+    "courier": {
+      "partner": "BlueDart / Delhivery Air",
+      "awb": "PENDING-ALLOCATION",
+      "trackingUrl": ""
+    },
+    "timeline": [
+      {
+        "status": "PLACED",
+        "label": "Order Confirmed & Placed",
+        "timestamp": "2026-10-17T10:41:58.131Z",
+        "note": "Payment mode: Prepaid UPI / Card. GST Tax invoice registered with ITC."
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-10-17T10:41:58.131Z",
+    "updatedAt": "2026-10-17T10:41:58.131Z"
+  },
+  {
+    "id": "AUR-2026-8941",
+    "customer": {
+      "name": "Dr. Sameer Kulkarni",
+      "email": "dr.kulkarni@dentalsolutions.in",
+      "phone": "+91 98201 44521",
+      "address": "Suite 402, Lotus Grandeur, Veera Desai Road",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "pincode": "400053",
+      "gstin": "27AABCK1234F1Z8"
+    },
+    "items": [
+      {
+        "id": "elegoo-dental-resin",
+        "name": "Elegoo Dental Castable Resin 1000g",
+        "price": 3899,
+        "qty": 2,
+        "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    "subtotal": 7798,
+    "gst": 1404,
+    "shipping": 0,
+    "total": 9202,
+    "status": "DISPATCHED",
+    "paymentMethod": "Prepaid UPI",
+    "paymentStatus": "PAID",
+    "courier": {
+      "partner": "BlueDart Express",
+      "awb": "BLUEDART-882941029",
+      "trackingUrl": "https://www.bluedart.com/tracking?track=BLUEDART-882941029"
+    },
+    "timeline": [
+      {
+        "status": "PLACED",
+        "label": "Order Placed & Verified",
+        "timestamp": "2026-10-15T11:20:00Z",
+        "note": "Payment received via UPI. Tax invoice generated."
+      },
+      {
+        "status": "PROCESSING",
+        "label": "Packed & Quality Inspected",
+        "timestamp": "2026-10-15T14:45:00Z",
+        "note": "Double-cushioned tamper-proof packaging sealed at Mumbai Fulfillment Hub."
+      },
+      {
+        "status": "DISPATCHED",
+        "label": "Dispatched with BlueDart Express",
+        "timestamp": "2026-10-16T09:30:00Z",
+        "note": "Airway Bill BLUEDART-882941029 scanned at Western Hub. Pan-India Express transit."
+      }
+    ],
+    "createdAt": "2026-10-15T11:20:00Z",
+    "updatedAt": "2026-10-16T09:30:00Z"
+  },
+  {
+    "id": "AUR-2026-9204",
+    "customer": {
+      "name": "Pooja Venkat",
+      "email": "pooja.venkat@archstudio.in",
+      "phone": "+91 97412 88390",
+      "address": "Plot 12, Indiranagar 100ft Road",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "pincode": "560038"
+    },
+    "items": [
+      {
+        "id": "bambu-a1-mini",
+        "name": "Bambu Lab A1 Mini 3D Printer",
+        "price": 27999,
+        "qty": 1,
+        "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    "subtotal": 27999,
+    "gst": 5040,
+    "shipping": 0,
+    "total": 33039,
+    "status": "PROCESSING",
+    "paymentMethod": "Corporate Net Banking",
+    "paymentStatus": "PAID",
+    "courier": {
+      "partner": "Delhivery Air Express",
+      "awb": "DELHIVERY-99410294",
+      "trackingUrl": "https://www.delhivery.com"
+    },
+    "timeline": [
+      {
+        "status": "PLACED",
+        "label": "Order Confirmed",
+        "timestamp": "2026-10-17T08:15:00Z",
+        "note": "Official OEM warranty registered under customer serial number."
+      },
+      {
+        "status": "PROCESSING",
+        "label": "Laser Inspection & Calibration Verification",
+        "timestamp": "2026-10-17T11:00:00Z",
+        "note": "Machine package ready for handover to courier partner."
+      }
+    ],
+    "createdAt": "2026-10-17T08:15:00Z",
+    "updatedAt": "2026-10-17T11:00:00Z"
+  }
+]
