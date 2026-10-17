@@ -584,11 +584,17 @@
           <strong id="successOrderId" style="font-family: var(--font-mono); font-size: 1.4rem; color: var(--color-champagne); letter-spacing: 0.05em;">AUR-2026-XXXX</strong>
         </div>
 
-        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
           <button onclick="trackPlacedOrder()" class="btn-magnetic">
             <span class="btn-dot"></span> Track Live Dispatch Status
           </button>
-          <button onclick="closeCheckoutModal()" class="btn-nav-action" style="padding: 12px 20px;">
+          <a id="btnSuccessInvoice" href="/invoice.html" target="_blank" class="btn-nav-action" style="padding: 12px 18px; text-decoration: none; color: #fff;">
+            📄 GST Tax Invoice ↗
+          </a>
+          <a href="/account.html" class="btn-nav-action" style="padding: 12px 18px; text-decoration: none; color: #fff;">
+            📦 My Account &amp; Orders
+          </a>
+          <button onclick="closeCheckoutModal()" class="btn-nav-action" style="padding: 12px 18px;">
             Continue Shopping
           </button>
         </div>

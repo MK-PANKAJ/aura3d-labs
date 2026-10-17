@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Account Portal — Aura3D Labs</title>
+  <meta name="description" content="Manage your Aura3D orders, track dispatches, update delivery addresses, and download GST tax invoices.">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .account-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      margin-top: 36px;
+    }
+    .account-sidebar {
+      background: var(--color-graphite);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      padding: 24px;
+      height: fit-content;
+    }
+    .user-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-hairline);
+      margin-bottom: 16px;
+    }
+    .user-avatar-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(212,175,55,0.12);
+      border: 1px solid var(--color-champagne);
+      color: var(--color-champagne);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .account-nav-btn {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--color-muted);
+      padding: 12px 14px;
+      border-radius: 4px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      margin-bottom: 4px;
+    }
+    .account-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+    }
+    .account-nav-btn.active {
+      background: rgba(212, 175, 55, 0.1);
+      color: var(--color-champagne);
+      font-weight: 600;
+    }
+
+    .order-card-amazon {
+      background: var(--color-graphite);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .order-card-header {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.8rem;
+    }
+    .order-card-body {
+      padding: 20px;
+    }
+    .order-card-item {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .order-card-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 860px) {
+      .account-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- Editorial Top Navigation -->
+  <header class="site-nav">
+    <div class="editorial-container nav-wrapper">
+      <a href="/" class="nav-brand" aria-label="Aura3D Labs Home">
+        <span class="nav-brand-title">AURA3D<span>Labs</span></span>
+        <span class="nav-meta-coord">Customer Desk</span>
+      </a>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-menu">
+          <li><a href="/" class="nav-item-link">Store</a></li>
+          <li><a href="/spares.html" class="nav-item-link">OEM Spares</a></li>
+          <li><a href="/track.html" class="nav-item-link">Track Order</a></li>
+          <li><a href="/account.html" class="nav-item-link active">My Account</a></li>
+          <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20have%20an%20account%20inquiry" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link">
+          Direct Desk
+        </a>
+        <a href="/" class="btn-nav-action">
+          Storefront ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="editorial-container" style="padding: 40px 0 80px;">
+    
+    <!-- STATE 1: GUEST / AUTHENTICATION VIEW -->
+    <div id="accountAuthSection" style="display: none; max-width: 480px; margin: 40px auto; background: var(--color-graphite); border: 1px solid var(--border-hairline); border-radius: 6px; padding: 32px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span class="editorial-section-tag">AURA3D CLIENT DESK</span>
+        <h1 style="font-family: var(--font-display); font-size: 1.7rem; color: #fff; margin: 6px 0 4px;">
+          Welcome to Customer Portal
+        </h1>
+        <p style="font-size: 0.85rem; color: var(--color-muted); margin: 0;">
+          Sign in to access your orders, live dispatches, and GST tax invoices.
+        </p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="btnTabLogin" onclick="switchAccountAuth('login')">Sign In</button>
+        <button class="auth-tab-btn" id="btnTabRegister" onclick="switchAccountAuth('register')">Create Account</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="pageLoginForm" onsubmit="handleAccountLogin(event)">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 6px;">EMAIL ADDRESS *</label>
+          <input type="email" id="accLoginEmail" required placeholder="aditya@domain.com" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 12px 14px; width: 100%; color: #fff;">
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 6px;">PASSWORD *</label>
+          <input type="password" id="accLoginPassword" required placeholder="••••••••••••" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 12px 14px; width: 100%; color: #fff;">
+        </div>
+        <button type="submit" id="btnSubmitAccLogin" class="btn-magnetic" style="width: 100%; justify-content: center; padding: 14px;">
+          <span class="btn-dot"></span> Sign In to Account &rarr;
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="pageRegisterForm" style="display: none;" onsubmit="handleAccountRegister(event)">
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">FULL NAME *</label>
+          <input type="text" id="accRegName" required placeholder="Aditya Singhania" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">MOBILE NUMBER *</label>
+            <input type="tel" id="accRegPhone" required placeholder="+91 98765 43210" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+          <div>
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">EMAIL *</label>
+            <input type="email" id="accRegEmail" required placeholder="aditya@domain.com" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+          </div>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">PASSWORD *</label>
+          <input type="password" id="accRegPassword" required placeholder="Min 6 characters" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">DEFAULT ADDRESS *</label>
+          <input type="text" id="accRegAddress" required placeholder="Lab Suite / Street" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;">
+          <div>
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">CITY *</label>
+            <input type="text" id="accRegCity" required placeholder="Bengaluru" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+          </div>
+          <div>
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 4px;">PINCODE *</label>
+            <input type="text" id="accRegPincode" required placeholder="560100" class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 12px; width: 100%; color: #fff;">
+          </div>
+        </div>
+        <button type="submit" id="btnSubmitAccReg" class="btn-magnetic" style="width: 100%; justify-content: center; padding: 14px;">
+          <span class="btn-dot"></span> Register Customer Account &rarr;
+        </button>
+      </form>
+    </div>
+
+    <!-- STATE 2: AUTHENTICATED CUSTOMER DASHBOARD -->
+    <div id="accountDashboardSection" style="display: none;">
+      
+      <div class="account-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="account-sidebar">
+          <div class="user-profile-header">
+            <div class="user-avatar-circle" id="userAvatarText">AS</div>
+            <div>
+              <strong id="userNameText" style="color: #fff; font-size: 1rem; display: block;">Aditya Singhania</strong>
+              <span id="userEmailText" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-muted);">aditya@domain.com</span>
+            </div>
+          </div>
+
+          <nav>
+            <button class="account-nav-btn active" onclick="switchCustomerView('orders', this)">
+              <span>📦 My Orders</span>
+              <span id="badgeOrderCount" style="background: rgba(212,175,55,0.2); color: var(--color-champagne); font-family: var(--font-mono); font-size: 0.7rem; padding: 2px 7px; border-radius: 10px;">0</span>
+            </button>
+            <button class="account-nav-btn" onclick="switchCustomerView('profile', this)">
+              <span>👤 Profile Information</span>
+            </button>
+            <button class="account-nav-btn" onclick="switchCustomerView('addresses', this)">
+              <span>📍 Manage Addresses</span>
+            </button>
+            <button class="account-nav-btn" onclick="switchCustomerView('reviews', this)">
+              <span>⭐ My Verified Reviews</span>
+            </button>
+            <button class="account-nav-btn" onclick="handleCustomerSignOut()" style="color: #f87171; margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px;">
+              <span>🚪 Sign Out</span>
+            </button>
+          </nav>
+        </aside>
+
+        <!-- Main Content View Area -->
+        <section id="accountViewArea">
+          
+          <!-- TAB 1: MY ORDERS VIEW -->
+          <div id="viewOrders">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h2 style="font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin: 0 0 4px;">My Orders</h2>
+                <p style="font-size: 0.8rem; color: var(--color-muted); margin: 0;">Track dispatches, print GST tax invoices, or re-order additive systems.</p>
+              </div>
+              <div>
+                <select id="orderStatusFilterSelect" class="admin-select" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 8px 12px; color: #fff; font-size: 0.8rem;" onchange="filterCustomerOrders()">
+                  <option value="ALL">All Orders</option>
+                  <option value="DISPATCHED">Dispatched / In Transit</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="customerOrdersContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 2: PROFILE INFORMATION -->
+          <div id="viewProfile" style="display: none;">
+            <div class="track-card">
+              <h2 style="font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 0 0 16px;">Profile Information</h2>
+              <form id="editProfileForm" onsubmit="handleSaveProfile(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                  <div>
+                    <label class="admin-label">Full Name</label>
+                    <input type="text" id="profName" required class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+                  </div>
+                  <div>
+                    <label class="admin-label">Mobile Number</label>
+                    <input type="tel" id="profPhone" required class="admin-input" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+                  </div>
+                </div>
+                <div style="margin-bottom: 14px;">
+                  <label class="admin-label">Email Address (Read-only)</label>
+                  <input type="email" id="profEmail" readonly class="admin-input" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: var(--color-muted);">
+                </div>
+                <button type="submit" id="btnSaveProf" class="btn-magnetic" style="padding: 12px 24px;">
+                  <span class="btn-dot"></span> Save Profile Changes
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- TAB 3: MANAGE ADDRESSES -->
+          <div id="viewAddresses" style="display: none;">
+            <div class="track-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 0;">Saved Delivery Locations</h2>
+              </div>
+              <div id="addressCardsWrap">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: MY REVIEWS -->
+          <div id="viewReviews" style="display: none;">
+            <div class="track-card">
+              <h2 style="font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 0 0 16px;">My Verified Reviews</h2>
+              <div id="customerReviewsWrap">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    let activeCustomer = null;
+    let customerOrders = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('aura3d_customer_token');
+      if (!token) {
+        showAuthView();
+        return;
+      }
+      await loadCustomerAccount(token);
+    });
+
+    function showAuthView() {
+      document.getElementById('accountAuthSection').style.display = 'block';
+      document.getElementById('accountDashboardSection').style.display = 'none';
+    }
+
+    function switchAccountAuth(tab) {
+      document.getElementById('btnTabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('btnTabRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('pageLoginForm').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('pageRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    async function handleAccountLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('accLoginEmail').value.trim();
+      const password = document.getElementById('accLoginPassword').value.trim();
+      const btn = document.getElementById('btnSubmitAccLogin');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-dot"></span> Authenticating...';
+      }
+
+      try {
+        const res = await fetch('/api/customer/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+          localStorage.setItem('aura3d_customer_token', data.token);
+          await loadCustomerAccount(data.token);
+        } else {
+          alert(data.error || 'Login failed. Please check credentials.');
+        }
+      } catch (err) {
+        alert('Server connectivity error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="btn-dot"></span> Sign In to Account &rarr;';
+        }
+      }
+    }
+
+    async function handleAccountRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('accRegName').value.trim();
+      const phone = document.getElementById('accRegPhone').value.trim();
+      const email = document.getElementById('accRegEmail').value.trim();
+      const password = document.getElementById('accRegPassword').value.trim();
+      const address = document.getElementById('accRegAddress').value.trim();
+      const city = document.getElementById('accRegCity').value.trim();
+      const pincode = document.getElementById('accRegPincode').value.trim();
+
+      const btn = document.getElementById('btnSubmitAccReg');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-dot"></span> Creating Account...';
+      }
+
+      try {
+        const res = await fetch('/api/customer/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, email, password, address, city, pincode })
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+          localStorage.setItem('aura3d_customer_token', data.token);
+          await loadCustomerAccount(data.token);
+        } else {
+          alert(data.error || 'Registration failed');
+        }
+      } catch (err) {
+        alert('Registration error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="btn-dot"></span> Register Customer Account &rarr;';
+        }
+      }
+    }
+
+    async function loadCustomerAccount(token) {
+      try {
+        const res = await fetch('/api/customer/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          localStorage.removeItem('aura3d_customer_token');
+          showAuthView();
+          return;
+        }
+
+        const data = await res.json();
+        activeCustomer = data.customer;
+        customerOrders = data.orders || [];
+
+        renderDashboard();
+      } catch (e) {
+        showAuthView();
+      }
+    }
+
+    function renderDashboard() {
+      document.getElementById('accountAuthSection').style.display = 'none';
+      document.getElementById('accountDashboardSection').style.display = 'block';
+
+      // Set user info
+      document.getElementById('userNameText').textContent = activeCustomer.name;
+      document.getElementById('userEmailText').textContent = activeCustomer.email;
+      
+      const initials = activeCustomer.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('userAvatarText').textContent = initials || 'C';
+
+      // Badge
+      document.getElementById('badgeOrderCount').textContent = customerOrders.length;
+
+      // Populate profile form
+      document.getElementById('profName').value = activeCustomer.name || '';
+      document.getElementById('profPhone').value = activeCustomer.phone || '';
+      document.getElementById('profEmail').value = activeCustomer.email || '';
+
+      renderCustomerOrdersList(customerOrders);
+      renderAddressCard();
+    }
+
+    function switchCustomerView(viewName, btn) {
+      document.querySelectorAll('.account-nav-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      document.getElementById('viewOrders').style.display = viewName === 'orders' ? 'block' : 'none';
+      document.getElementById('viewProfile').style.display = viewName === 'profile' ? 'block' : 'none';
+      document.getElementById('viewAddresses').style.display = viewName === 'addresses' ? 'block' : 'none';
+      document.getElementById('viewReviews').style.display = viewName === 'reviews' ? 'block' : 'none';
+
+      if (viewName === 'reviews') {
+        loadCustomerReviews();
+      }
+    }
+
+    function filterCustomerOrders() {
+      const filter = document.getElementById('orderStatusFilterSelect').value;
+      if (filter === 'ALL') {
+        renderCustomerOrdersList(customerOrders);
+      } else {
+        const filtered = customerOrders.filter(o => o.status === filter);
+        renderCustomerOrdersList(filtered);
+      }
+    }
+
+    function renderCustomerOrdersList(orders) {
+      const container = document.getElementById('customerOrdersContainer');
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="track-card" style="text-align: center; padding: 50px 20px;">
+            <h3 style="color: #fff; font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 8px;">No Orders Found</h3>
+            <p style="color: var(--color-muted); font-size: 0.85rem; margin: 0 0 16px;">You haven't placed an order matching this status yet.</p>
+            <a href="/" class="btn-magnetic" style="display: inline-flex;"><span class="btn-dot"></span> Explore 3D Printers &amp; Materials &rarr;</a>
+          </div>
+        `;
+        return;
+      }
+
+      const statusMap = {
+        'PLACED': { text: 'Order Placed', color: '#38bdf8' },
+        'PROCESSING': { text: 'Processing & Packaging', color: '#fbbf24' },
+        'DISPATCHED': { text: 'Air Courier Dispatched', color: '#c084fc' },
+        'IN_TRANSIT': { text: 'In Transit / Out for Delivery', color: '#fb923c' },
+        'DELIVERED': { text: 'Delivered', color: '#34d399' },
+        'CANCELLED': { text: 'Cancelled', color: '#f87171' }
+      };
+
+      container.innerHTML = orders.map(ord => {
+        const dateStr = ord.createdAt ? new Date(ord.createdAt).toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        }) : 'Recent';
+
+        const st = statusMap[ord.status] || statusMap['PLACED'];
+        const canCancel = ['PLACED', 'PROCESSING'].includes(ord.status);
+
+        return `
+          <div class="order-card-amazon">
+            <div class="order-card-header">
+              <div>
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); display: block;">ORDER PLACED</span>
+                <strong style="color: #fff;">${dateStr}</strong>
+              </div>
+              <div>
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); display: block;">TOTAL AMOUNT</span>
+                <strong style="font-family: var(--font-mono); color: var(--color-champagne);">₹${(ord.total || 0).toLocaleString('en-IN')}</strong>
+              </div>
+              <div>
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); display: block;">SHIP TO</span>
+                <strong style="color: #fff;">${ord.customer ? ord.customer.name : 'Recipient'}</strong>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); display: block;">ORDER # ${ord.id}</span>
+                <a href="/invoice.html?id=${ord.id}" target="_blank" style="color: var(--color-champagne); font-family: var(--font-mono); font-size: 0.75rem; text-decoration: underline;">
+                  View GST Invoice ↗
+                </a>
+              </div>
+            </div>
+
+            <div class="order-card-body">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <span style="font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: ${st.color};">
+                  ● ${st.text}
+                </span>
+                <span style="font-size: 0.8rem; color: var(--color-muted);">
+                  ${ord.estimatedDelivery ? `Expected: ${ord.estimatedDelivery}` : ''}
+                </span>
+              </div>
+
+              ${(ord.items || []).map(item => `
+                <div class="order-card-item">
+                  <img src="${item.image || 'https://images.unsplash.com/photo-1631541909061-71e349d1f203?auto=format&fit=crop&w=150&q=80'}" alt="${item.name}" style="width: 58px; height: 58px; object-fit: cover; border-radius: 4px; background: #000;">
+                  <div style="flex: 1; min-width: 0;">
+                    <strong style="color: #fff; font-size: 0.9rem; display: block;">${item.name}</strong>
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">Qty: ${item.qty} &bull; ₹${Number(item.price).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="/?buyAgain=${item.id}" class="btn-magnetic" style="font-size: 0.7rem; padding: 6px 12px;">
+                      Buy Again
+                    </a>
+                  </div>
+                </div>
+              `).join('')}
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap;">
+                <a href="/track.html?id=${ord.id}" class="btn-magnetic" style="font-size: 0.75rem; padding: 8px 16px;">
+                  <span class="btn-dot"></span> Track Consignment &rarr;
+                </a>
+                <a href="/invoice.html?id=${ord.id}" target="_blank" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-hairline); color: #fff; padding: 8px 14px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.75rem; text-decoration: none;">
+                  Tax Invoice PDF
+                </a>
+                ${canCancel ? `
+                  <button onclick="cancelCustomerOrder('${ord.id}')" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 8px 14px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer;">
+                    Cancel Order
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAddressCard() {
+      const container = document.getElementById('addressCardsWrap');
+      if (!container || !activeCustomer) return;
+      container.innerHTML = `
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 18px; max-width: 440px;">
+          <span style="font-family: var(--font-mono); font-size: 0.68rem; color: #34d399; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+            ● DEFAULT SHIPPING LOCATION
+          </span>
+          <strong style="color: #fff; font-size: 1rem; display: block; margin: 8px 0 4px;">${activeCustomer.name}</strong>
+          <p style="color: var(--color-titanium); font-size: 0.85rem; margin: 0 0 10px; line-height: 1.5;">
+            ${activeCustomer.address || 'Electronics Zone'}<br>
+            ${activeCustomer.city || 'Bengaluru'}, ${activeCustomer.state || 'Karnataka'} - ${activeCustomer.pincode || '560100'}
+          </p>
+          <div style="font-size: 0.8rem; color: var(--color-muted);">
+            Phone: ${activeCustomer.phone || '+91 98765 43210'}
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleSaveProfile(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('aura3d_customer_token');
+      const name = document.getElementById('profName').value.trim();
+      const phone = document.getElementById('profPhone').value.trim();
+      const btn = document.getElementById('btnSaveProf');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-dot"></span> Saving...';
+
+      try {
+        const res = await fetch('/api/customer/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, phone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          activeCustomer.name = name;
+          activeCustomer.phone = phone;
+          renderDashboard();
+          alert('Profile information updated successfully.');
+        } else {
+          alert('Failed to update: ' + data.error);
+        }
+      } catch (err) {
+        alert('Server connection error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="btn-dot"></span> Save Profile Changes';
+      }
+    }
+
+    async function cancelCustomerOrder(orderId) {
+      const reason = prompt('Please specify reason for cancellation:', 'Changed my delivery preferences');
+      if (reason === null) return;
+
+      try {
+        const res = await fetch(`/api/orders/${orderId}/cancel`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Order cancelled successfully.');
+          const token = localStorage.getItem('aura3d_customer_token');
+          await loadCustomerAccount(token);
+        } else {
+          alert('Failed to cancel order: ' + data.error);
+        }
+      } catch (err) {
+        alert('Communication error');
+      }
+    }
+
+    async function loadCustomerReviews() {
+      const wrap = document.getElementById('customerReviewsWrap');
+      wrap.innerHTML = '<div style="font-family: var(--font-mono); color: var(--color-muted); font-size: 0.8rem;">Loading your verified feedback...</div>';
+      try {
+        const res = await fetch('/api/reviews');
+        const data = await res.json();
+        const myReviews = (data.reviews || []).filter(r => r.name && r.name.toLowerCase() === (activeCustomer.name || '').toLowerCase());
+        if (myReviews.length === 0) {
+          wrap.innerHTML = '<div style="color: var(--color-muted); font-size: 0.85rem;">You haven\'t reviewed any items yet. You can submit reviews from your order history.</div>';
+          return;
+        }
+
+        wrap.innerHTML = myReviews.map(r => `
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <strong style="color: #fff; font-size: 0.9rem;">${r.product || r.productId}</strong>
+              <span style="color: var(--color-champagne);">${'★'.repeat(r.rating || 5)}</span>
+            </div>
+            <p style="font-size: 0.825rem; color: var(--color-titanium); line-height: 1.45; margin: 0;">
+              "${r.review}"
+            </p>
+          </div>
+        `).join('');
+      } catch (e) {
+        wrap.innerHTML = '<div style="color: #f87171;">Failed to load reviews.</div>';
+      }
+    }
+
+    function handleCustomerSignOut() {
+      localStorage.removeItem('aura3d_customer_token');
+      activeCustomer = null;
+      customerOrders = [];
+      showAuthView();
+    }
+  </script>
+</body>
+</html>

@@ -31,6 +31,15 @@ async function initApp() {
     allProducts = data.products || [];
     renderProducts(allProducts);
     updateCartBadge();
+
+    // Check for buyAgain parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const buyAgainSku = urlParams.get('buyAgain');
+    if (buyAgainSku) {
+      setTimeout(() => {
+        addToCart(buyAgainSku);
+      }, 500);
+    }
   } catch (err) {
     console.error('Failed to load products:', err);
   }
@@ -630,6 +639,8 @@ async function handlePlaceOrder(e) {
       const successView = document.getElementById('checkoutSuccessView');
       successView.style.display = 'block';
       document.getElementById('successOrderId').textContent = data.order.id;
+      const invBtn = document.getElementById('btnSuccessInvoice');
+      if (invBtn) invBtn.href = `/invoice.html?id=${data.order.id}`;
 
       showToast(`Order ${data.order.id} placed successfully!`);
     } else {

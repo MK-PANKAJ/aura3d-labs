@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Consignment Tracking — Aura3D Labs</title>
+  <meta name="description" content="Track your Aura3D Labs 3D printer, filament, and OEM spare consignment in real-time. Pan-India express delivery telemetry.">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .track-hero {
+      padding: 60px 0 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+    .track-search-box {
+      max-width: 600px;
+      margin: 24px auto 0;
+      display: flex;
+      gap: 10px;
+    }
+    .track-card {
+      background: var(--color-graphite);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      padding: 30px;
+      margin-bottom: 24px;
+    }
+    .delivery-eta-banner {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(45,212,191,0.05));
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .otp-badge {
+      background: #000;
+      border: 1px solid var(--color-champagne);
+      border-radius: 4px;
+      padding: 10px 18px;
+      text-align: center;
+    }
+    .grid-manifest-address {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    @media (max-width: 800px) {
+      .grid-manifest-address {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- Editorial Top Navigation -->
+  <header class="site-nav">
+    <div class="editorial-container nav-wrapper">
+      <a href="/" class="nav-brand" aria-label="Aura3D Labs Home">
+        <span class="nav-brand-title">AURA3D<span>Labs</span></span>
+        <span class="nav-meta-coord">Telemetry &bull; Track</span>
+      </a>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-menu">
+          <li><a href="/" class="nav-item-link">Store</a></li>
+          <li><a href="/spares.html" class="nav-item-link">OEM Spares</a></li>
+          <li><a href="/track.html" class="nav-item-link active">Track Consignment</a></li>
+          <li><a href="/account.html" class="nav-item-link">My Account</a></li>
+          <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20am%20tracking%20my%20shipment" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link">
+          Direct Desk
+        </a>
+        <a href="/account.html" class="btn-nav-action" style="display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="navUserBadge">Account</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Search Stage -->
+  <section class="track-hero">
+    <div class="editorial-container">
+      <span class="editorial-section-tag">LIVE CONSIGNMENT TELEMETRY</span>
+      <h1 style="font-family: var(--font-display); font-size: 2.2rem; color: #fff; margin: 8px 0;">
+        Track Your Additive Shipment
+      </h1>
+      <p style="color: var(--color-muted); max-width: 540px; margin: 0 auto; font-size: 0.95rem;">
+        Real-time GPS dispatch verification, courier air waybill status, and digital GST invoicing.
+      </p>
+
+      <form class="track-search-box" onsubmit="handlePageTrackSearch(event)">
+        <input type="text" id="pageTrackInput" placeholder="Enter Order ID (e.g. AUR-2026-2692) or Mobile..." required class="admin-input" style="flex: 1; padding: 14px 18px; font-size: 0.95rem; font-family: var(--font-mono); background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; color: #fff;">
+        <button type="submit" id="pageTrackBtn" class="btn-magnetic" style="padding: 0 24px;">
+          <span class="btn-dot"></span> Track Package &rarr;
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Main Tracking Container -->
+  <main class="editorial-container" style="padding: 40px 0 80px;">
+    
+    <div id="trackingStateWrap">
+      <div style="text-align: center; padding: 60px 20px; color: var(--color-muted);">
+        <p style="font-family: var(--font-mono); font-size: 0.85rem;">Enter your Order Reference ID or phone number to load live shipment tracking.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Order Cancellation Modal -->
+  <div class="modal-backdrop" id="cancelOrderModal" onclick="if(event.target===this) closeCancelModal()">
+    <div class="modal-box" style="max-width: 480px;" role="dialog" aria-label="Cancel Order Modal">
+      <button class="modal-close" onclick="closeCancelModal()" aria-label="Close Modal">&times;</button>
+      <div style="padding: 10px 4px;">
+        <span style="font-family: var(--font-mono); font-size: 0.7rem; color: #f87171; letter-spacing: 0.1em; text-transform: uppercase;">
+          ● CANCEL ORDER REQUEST
+        </span>
+        <h2 style="font-family: var(--font-display); font-size: 1.35rem; margin: 6px 0 14px; color: #fff;">
+          Cancel Order: <span id="cancelModalOrderRef" style="color: var(--color-champagne);"></span>
+        </h2>
+        <p style="font-size: 0.825rem; color: var(--color-muted); margin-bottom: 16px;">
+          Orders can only be cancelled before dispatch handoff to our courier air partner. If prepaid, full 100% refund is initiated back to your original source.
+        </p>
+
+        <form onsubmit="submitOrderCancellation(event)">
+          <input type="hidden" id="cancelOrderIdVal" value="">
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-muted); margin-bottom: 6px;">
+              REASON FOR CANCELLATION *
+            </label>
+            <select id="cancelReasonSelect" required class="admin-select" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-hairline); border-radius: 4px; padding: 10px 14px; width: 100%; color: #fff;">
+              <option value="Changed delivery address">Changed delivery address</option>
+              <option value="Ordered duplicate / wrong item">Ordered duplicate / wrong item</option>
+              <option value="Found alternative solution">Found alternative solution</option>
+              <option value="Payment / Billing adjustment">Payment / Billing adjustment</option>
+              <option value="Other / Technical reason">Other / Technical reason</option>
+            </select>
+          </div>
+          <button type="submit" id="btnConfirmCancel" class="btn-magnetic" style="width: 100%; justify-content: center; background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #f87171;">
+            Confirm Order Cancellation
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeTrackOrder = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check customer session
+      const token = localStorage.getItem('aura3d_customer_token');
+      if (token) {
+        fetch('/api/customer/me', { headers: { 'Authorization': `Bearer ${token}` } })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.customer) {
+              const badge = document.getElementById('navUserBadge');
+              if (badge) badge.textContent = data.customer.name.split(' ')[0];
+            }
+          }).catch(() => {});
+      }
+
+      // Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('id') || urlParams.get('order') || urlParams.get('phone');
+      if (query) {
+        document.getElementById('pageTrackInput').value = query;
+        loadTracking(query);
+      }
+    });
+
+    function handlePageTrackSearch(e) {
+      e.preventDefault();
+      const val = document.getElementById('pageTrackInput').value.trim();
+      if (!val) return;
+      loadTracking(val);
+    }
+
+    async function loadTracking(query) {
+      const container = document.getElementById('trackingStateWrap');
+      const btn = document.getElementById('pageTrackBtn');
+      if (btn) btn.innerHTML = '<span class="btn-dot"></span> Locating...';
+      container.innerHTML = '<div style="text-align: center; padding: 60px 20px; font-family: var(--font-mono); color: var(--color-champagne);">Querying national logistics hub...</div>';
+
+      try {
+        const res = await fetch(`/api/orders/track/${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (!data.success || !data.order) {
+          container.innerHTML = `
+            <div class="track-card" style="text-align: center; border-color: rgba(239,68,68,0.3);">
+              <h3 style="color: #f87171; font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 8px;">Consignment Not Found</h3>
+              <p style="color: var(--color-muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 20px;">
+                ${data.error || 'No shipment matching the provided reference number was located in our active database.'}
+              </p>
+              <a href="/account.html" class="btn-action" style="background: rgba(255,255,255,0.08); color: #fff; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-family: var(--font-mono); font-size: 0.8rem;">
+                Check My Order History &rarr;
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        activeTrackOrder = data.order;
+        renderDetailedTracking(data.order);
+      } catch (err) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #f87171;">Failed to connect to tracking servers.</div>';
+      } finally {
+        if (btn) btn.innerHTML = '<span class="btn-dot"></span> Track Package &rarr;';
+      }
+    }
+
+    function renderDetailedTracking(order) {
+      const container = document.getElementById('trackingStateWrap');
+      
+      const statuses = ['PLACED', 'PROCESSING', 'DISPATCHED', 'IN_TRANSIT', 'DELIVERED'];
+      const curIdx = statuses.indexOf((order.status || 'PLACED').toUpperCase());
+      const progressPct = curIdx >= 0 ? (curIdx / (statuses.length - 1)) * 100 : 0;
+
+      const isCancelled = order.status === 'CANCELLED';
+      const canCancel = ['PLACED', 'PROCESSING'].includes(order.status);
+
+      const statusMap = {
+        'PLACED': { label: 'Order Confirmed & Queued', color: '#38bdf8', desc: 'Order verified by gateway. Scheduled for precision warehouse packaging.' },
+        'PROCESSING': { label: 'Packed & Quality Inspected', color: '#fbbf24', desc: 'Unit inspected by Aura3D technician & boxed in ESD tamper-evident casing.' },
+        'DISPATCHED': { label: 'Handed Over to Air Courier', color: '#c084fc', desc: 'Shipment manifested with courier air partner. Flight dispatch in progress.' },
+        'IN_TRANSIT': { label: 'In Transit / Out for Delivery', color: '#fb923c', desc: 'Arrived at your destination city hub. Out for delivery with courier agent.' },
+        'DELIVERED': { label: 'Delivered Successfully', color: '#34d399', desc: 'Package received & signed by customer. Official OEM warranty active.' },
+        'CANCELLED': { label: 'Order Cancelled', color: '#f87171', desc: 'Order was cancelled. If prepaid, refund process has been initiated.' }
+      };
+
+      const curStatusInfo = statusMap[order.status] || statusMap['PLACED'];
+
+      container.innerHTML = `
+        <!-- ETA & Handshake OTP Banner -->
+        <div class="delivery-eta-banner">
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase;">
+              ● CONSIGNMENT STATUS: <span style="color: ${curStatusInfo.color}; font-weight: 700;">${order.status}</span>
+            </span>
+            <h2 style="font-family: var(--font-display); font-size: 1.6rem; color: #fff; margin: 4px 0;">
+              ${isCancelled ? 'Order Has Been Cancelled' : (order.status === 'DELIVERED' ? 'Package Delivered' : `Expected Delivery by ${order.estimatedDelivery || 'Wed, 21 Oct 2026'}`)}
+            </h2>
+            <p style="color: var(--color-titanium); font-size: 0.85rem; margin: 0;">
+              ${curStatusInfo.desc}
+            </p>
+          </div>
+
+          ${!isCancelled && order.status !== 'DELIVERED' ? `
+            <div class="otp-badge">
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--color-muted); display: block; text-transform: uppercase;">SECURE DELIVERY OTP</span>
+              <strong style="font-family: var(--font-mono); font-size: 1.5rem; color: var(--color-champagne); letter-spacing: 3px;">
+                ${order.deliveryOtp || '8349'}
+              </strong>
+              <span style="font-size: 0.65rem; color: var(--color-dim); display: block; margin-top: 2px;">Share with courier agent</span>
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- 5-Step Stepper Card -->
+        ${!isCancelled ? `
+          <div class="track-card">
+            <div class="order-stepper">
+              <div class="stepper-progress-bar" style="width: calc(${progressPct}% - 40px);"></div>
+              
+              <div class="step-node ${curIdx >= 0 ? (curIdx === 0 ? 'active' : 'completed') : ''}">
+                <div class="step-circle">${curIdx > 0 ? '✓' : '1'}</div>
+                <span class="step-label">Placed</span>
+              </div>
+
+              <div class="step-node ${curIdx >= 1 ? (curIdx === 1 ? 'active' : 'completed') : ''}">
+                <div class="step-circle">${curIdx > 1 ? '✓' : '2'}</div>
+                <span class="step-label">Packed</span>
+              </div>
+
+              <div class="step-node ${curIdx >= 2 ? (curIdx === 2 ? 'active' : 'completed') : ''}">
+                <div class="step-circle">${curIdx > 2 ? '✓' : '3'}</div>
+                <span class="step-label">Dispatched</span>
+              </div>
+
+              <div class="step-node ${curIdx >= 3 ? (curIdx === 3 ? 'active' : 'completed') : ''}">
+                <div class="step-circle">${curIdx > 3 ? '✓' : '4'}</div>
+                <span class="step-label">In Transit</span>
+              </div>
+
+              <div class="step-node ${curIdx >= 4 ? 'completed' : ''}">
+                <div class="step-circle">${curIdx >= 4 ? '✓' : '5'}</div>
+                <span class="step-label">Delivered</span>
+              </div>
+            </div>
+
+            <!-- Courier Details -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-hairline); font-size: 0.85rem;">
+              <div>
+                <span style="color: var(--color-muted); font-size: 0.7rem; font-family: var(--font-mono); display: block;">CARRIER &amp; LOGISTICS</span>
+                <strong style="color: #fff; font-size: 0.95rem;">${order.courier ? order.courier.partner : 'BlueDart Express Air'}</strong>
+              </div>
+              <div>
+                <span style="color: var(--color-muted); font-size: 0.7rem; font-family: var(--font-mono); display: block;">AIR WAYBILL / AWB</span>
+                <strong style="color: var(--color-champagne); font-family: var(--font-mono); font-size: 0.95rem;">
+                  ${order.courier && order.courier.awb && order.courier.awb !== 'PENDING-ALLOCATION' ? order.courier.awb : 'ALLOCATION QUEUE'}
+                </strong>
+              </div>
+              <div>
+                <span style="color: var(--color-muted); font-size: 0.7rem; font-family: var(--font-mono); display: block;">FULFILLMENT ORIGIN</span>
+                <strong style="color: #fff;">Aura3D Hub, Bengaluru (KA)</strong>
+              </div>
+              <div>
+                <span style="color: var(--color-muted); font-size: 0.7rem; font-family: var(--font-mono); display: block;">DESTINATION HUB</span>
+                <strong style="color: #fff;">${order.customer ? `${order.customer.city}, ${order.customer.pincode}` : 'Destination Hub'}</strong>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Manifest & Destination Grid -->
+        <div class="grid-manifest-address">
+          
+          <!-- Manifest Card -->
+          <div class="track-card">
+            <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 16px;">
+              CONSIGNMENT ITEMS (${(order.items || []).length} SKUs)
+            </span>
+
+            ${(order.items || []).map(item => `
+              <div style="display: flex; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <img src="${item.image || 'https://images.unsplash.com/photo-1631541909061-71e349d1f203?auto=format&fit=crop&w=150&q=80'}" alt="${item.name}" style="width: 54px; height: 54px; object-fit: cover; border-radius: 4px; background: #000;">
+                <div style="flex: 1; min-width: 0;">
+                  <strong style="color: #fff; font-size: 0.9rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</strong>
+                  <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">
+                    Qty: ${item.qty} &bull; ₹${Number(item.price).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <strong style="font-family: var(--font-mono); color: #fff; font-size: 0.95rem;">
+                  ₹${(item.price * item.qty).toLocaleString('en-IN')}
+                </strong>
+              </div>
+            `).join('')}
+
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-hairline); font-size: 0.85rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--color-muted);">
+                <span>Taxable Amount</span>
+                <span style="font-family: var(--font-mono); color: #fff;">₹${(order.subtotal || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--color-muted);">
+                <span>18% GST (Tax Invoice)</span>
+                <span style="font-family: var(--font-mono); color: #fff;">₹${(order.gst || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-hairline); padding-top: 10px; font-weight: 700; font-size: 1.1rem; color: #fff;">
+                <span>Total Paid</span>
+                <span style="font-family: var(--font-mono); color: var(--color-champagne);">₹${(order.total || 0).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap;">
+              <a href="/invoice.html?id=${order.id}" target="_blank" class="btn-magnetic" style="font-size: 0.75rem; padding: 10px 16px;">
+                <span class="btn-dot"></span> Download GST Tax Invoice ↗
+              </a>
+              ${canCancel ? `
+                <button onclick="openCancelModal('${order.id}')" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 10px 16px; border-radius: 3px; font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer;">
+                  ✕ Cancel Order
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Address & Timeline Card -->
+          <div>
+            <!-- Delivery Address -->
+            <div class="track-card">
+              <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 12px;">
+                DELIVERY ADDRESS
+              </span>
+              <strong style="color: #fff; font-size: 1rem; display: block;">${order.customer ? order.customer.name : 'Customer'}</strong>
+              <p style="color: var(--color-titanium); font-size: 0.85rem; margin: 4px 0 10px; line-height: 1.5;">
+                ${order.customer ? order.customer.address : ''}<br>
+                ${order.customer ? `${order.customer.city}, ${order.customer.state || 'Karnataka'} - ${order.customer.pincode}` : ''}
+              </p>
+              <div style="font-size: 0.8rem; color: var(--color-muted);">
+                <strong>Phone:</strong> ${order.customer ? order.customer.phone : ''}<br>
+                <strong>Email:</strong> ${order.customer ? order.customer.email : ''}<br>
+                ${order.customer && order.customer.gstin ? `<strong>GSTIN:</strong> <span style="font-family: var(--font-mono); color: #38bdf8;">${order.customer.gstin}</span>` : ''}
+              </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="track-card">
+              <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-champagne); letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 16px;">
+                AUDIT TIMELINE
+              </span>
+              <div class="timeline-list">
+                ${(order.timeline || []).slice().reverse().map(ev => {
+                  const tStr = ev.timestamp ? new Date(ev.timestamp).toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                  }) : 'Logged';
+                  return `
+                    <div class="timeline-item">
+                      <div class="timeline-dot"></div>
+                      <div class="timeline-label">${ev.label || ev.status}</div>
+                      <div class="timeline-meta">${tStr} &bull; Verified Gateway Telemetry</div>
+                      ${ev.note ? `<div class="timeline-note">${ev.note}</div>` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+    }
+
+    function openCancelModal(orderId) {
+      document.getElementById('cancelOrderIdVal').value = orderId;
+      document.getElementById('cancelModalOrderRef').textContent = orderId;
+      const modal = document.getElementById('cancelOrderModal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function closeCancelModal() {
+      const modal = document.getElementById('cancelOrderModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    async function submitOrderCancellation(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('cancelOrderIdVal').value;
+      const reason = document.getElementById('cancelReasonSelect').value;
+      const btn = document.getElementById('btnConfirmCancel');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Transmitting Cancellation...';
+      }
+
+      try {
+        const res = await fetch(`/api/orders/${orderId}/cancel`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeCancelModal();
+          alert('Your order has been cancelled successfully.');
+          loadTracking(orderId);
+        } else {
+          alert('Cancellation failed: ' + (data.error || 'Server rejected cancellation'));
+        }
+      } catch (err) {
+        alert('Network communication error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Confirm Order Cancellation';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

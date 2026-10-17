@@ -28,6 +28,22 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/track",
+      "destination": "/track.html"
+    },
+    {
+      "source": "/account",
+      "destination": "/account.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/account.html"
+    },
+    {
+      "source": "/invoice",
+      "destination": "/invoice.html"
     }
   ]
 }

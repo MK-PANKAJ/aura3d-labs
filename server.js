@@ -884,9 +884,16 @@ app.post('/api/orders', async (req, res) => {
 
     const orderId = `AUR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const nowIso = new Date().toISOString();
+    const deliveryOtp = String(Math.floor(1000 + Math.random() * 9000));
+    const estDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const estimatedDelivery = estDate.toLocaleDateString('en-IN', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
 
     const newOrder = {
       id: orderId,
+      deliveryOtp,
+      estimatedDelivery,
       customer: {
         name: customer.name.trim(),
         email: (customer.email || '').toLowerCase().trim(),
@@ -902,7 +909,8 @@ app.post('/api/orders', async (req, res) => {
         name: i.name,
         price: Number(i.price),
         qty: Number(i.qty || 1),
-        image: i.image
+        image: i.image,
+        hsn: i.id?.includes('filament') ? '3916' : (i.id?.includes('resin') ? '3907' : '8477')
       })),
       subtotal,
       gst,
@@ -956,6 +964,61 @@ app.post('/api/orders', async (req, res) => {
   } catch (err) {
     console.error('Checkout error:', err);
     res.status(500).json({ success: false, error: 'Checkout failed: ' + err.message });
+  }
+});
+
+// Single Order Detail (For Printable Tax Invoice & Standalone Views)
+app.get('/api/orders/:id', async (req, res) => {
+  try {
+    const orders = await db.getAllOrders();
+    const existing = orders.find(o => o.id.toLowerCase() === req.params.id.toLowerCase());
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+    res.json({ success: true, order: existing });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch order details' });
+  }
+});
+
+// Customer Cancel Order (Permitted if status is PLACED or PROCESSING)
+app.put('/api/orders/:id/cancel', async (req, res) => {
+  try {
+    const orders = await db.getAllOrders();
+    const existing = orders.find(o => o.id.toLowerCase() === req.params.id.toLowerCase());
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    if (['DISPATCHED', 'IN_TRANSIT', 'DELIVERED'].includes(existing.status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Order cannot be cancelled as it is already ${existing.status}. Please contact Direct Desk for returns.`
+      });
+    }
+
+    if (existing.status === 'CANCELLED') {
+      return res.status(400).json({ success: false, error: 'Order has already been cancelled.' });
+    }
+
+    const { reason } = req.body || {};
+    const nowIso = new Date().toISOString();
+
+    existing.status = 'CANCELLED';
+    existing.updatedAt = nowIso;
+    existing.timeline = existing.timeline || [];
+    existing.timeline.push({
+      status: 'CANCELLED',
+      label: 'Order Cancelled by Customer',
+      timestamp: nowIso,
+      note: reason ? reason.trim() : 'Customer requested order cancellation prior to dispatch.'
+    });
+
+    await db.updateOrder(existing.id, existing);
+    res.json({ success: true, message: 'Order cancelled successfully', order: existing });
+  } catch (err) {
+    console.error('Order cancellation error:', err);
+    res.status(500).json({ success: false, error: 'Failed to cancel order: ' + err.message });
   }
 });
 
@@ -1061,6 +1124,10 @@ app.get('/catalog', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'catalog.ht
 app.get('/spares', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'spares.html')));
 app.get('/guides', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'guides.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'admin.html')));
+app.get('/track', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'track.html')));
+app.get('/account', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'account.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'account.html')));
+app.get('/invoice', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'invoice.html')));
 
 if (require.main === module) {
   app.listen(PORT, () => {
