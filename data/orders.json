@@ -27,12 +27,12 @@
     "gst": 702,
     "shipping": 0,
     "total": 4601,
-    "status": "PLACED",
+    "status": "IN_TRANSIT",
     "paymentMethod": "Prepaid UPI / Card",
     "paymentStatus": "PAID",
     "courier": {
-      "partner": "BlueDart / Delhivery Air",
-      "awb": "PENDING-ALLOCATION",
+      "partner": "Delhivery Surface / Air",
+      "awb": "vgvg",
       "trackingUrl": ""
     },
     "timeline": [
@@ -41,11 +41,23 @@
         "label": "Order Confirmed & Placed",
         "timestamp": "2026-10-17T13:19:32.003Z",
         "note": "Payment mode: Prepaid UPI / Card. GST Tax invoice registered with ITC."
+      },
+      {
+        "status": "PLACED",
+        "label": "Order Confirmed",
+        "timestamp": "2026-10-17T13:21:58.931Z",
+        "note": "Order transitioned to PLACED by Aura3D Operations."
+      },
+      {
+        "status": "IN_TRANSIT",
+        "label": "In Transit (Out for Delivery)",
+        "timestamp": "2026-10-17T13:22:16.592Z",
+        "note": "Order transitioned to IN_TRANSIT by Aura3D Operations."
       }
     ],
     "notes": "Order placed via storefront web checkout.",
     "createdAt": "2026-10-17T13:19:32.003Z",
-    "updatedAt": "2026-10-17T13:19:32.003Z"
+    "updatedAt": "2026-10-17T13:22:16.592Z"
   },
   {
     "id": "AUR-2026-2375",

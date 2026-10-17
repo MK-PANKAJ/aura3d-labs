@@ -114,28 +114,35 @@ function clearRateLimit(ip) {
   loginAttempts.delete(ip);
 }
 
-// Active session token store: token -> { username, ip, expiresAt }
-const activeAdminTokens = new Map();
+// Stateless Cryptographic Session Engine (HMAC-SHA256)
+// Tokens survive all server restarts, multi-instance scaling, and Vercel serverless cold starts.
+const AUTH_SECRET = process.env.AUTH_SECRET || process.env.JWT_SECRET || 'aura3d_production_stateless_secret_key_2026_x89';
 
 function generateAdminToken(username, ip) {
-  const token = crypto.randomBytes(32).toString('hex');
-  activeAdminTokens.set(token, {
+  const payload = {
     username,
-    ip,
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
-  });
-  return token;
+    role: 'admin',
+    exp: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+  };
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url');
+  return `${body}.${sig}`;
 }
 
-// Periodic cleanup of expired tokens
-setInterval(() => {
-  const now = Date.now();
-  for (const [token, data] of activeAdminTokens.entries()) {
-    if (now > data.expiresAt) {
-      activeAdminTokens.delete(token);
-    }
+function verifyAdminToken(tokenStr) {
+  if (!tokenStr || typeof tokenStr !== 'string' || !tokenStr.includes('.')) return null;
+  const [body, sig] = tokenStr.split('.');
+  if (!body || !sig) return null;
+  const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url');
+  if (sig !== expectedSig) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    if (Date.now() > payload.exp) return null;
+    return payload;
+  } catch (err) {
+    return null;
   }
-}, 30 * 60 * 1000).unref();
+}
 
 function verifyAdmin(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -143,12 +150,11 @@ function verifyAdmin(req, res, next) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Admin authentication token required' });
   }
   const token = authHeader.split(' ')[1];
-  const session = activeAdminTokens.get(token);
-  if (!session || Date.now() > session.expiresAt) {
-    if (session) activeAdminTokens.delete(token);
+  const payload = verifyAdminToken(token);
+  if (!payload) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Session expired or invalid. Please log in again.' });
   }
-  req.adminUser = session.username;
+  req.adminUser = payload.username;
   next();
 }
 
@@ -704,10 +710,36 @@ app.post('/api/admin/firebase/sync', verifyAdmin, async (req, res) => {
   }
 });
 // ==============================================================================
-// CUSTOMER PORTAL & AUTHENTICATION ENGINE
+// CUSTOMER PORTAL & AUTHENTICATION ENGINE (STATELESS HMAC-SHA256)
 // ==============================================================================
-const activeCustomerTokens = new Map(); // token -> { id, email, expiresAt }
 const CUSTOMER_SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 Days
+
+function createCustomerToken(customer) {
+  const payload = {
+    id: customer.id,
+    email: (customer.email || '').toLowerCase().trim(),
+    name: customer.name || 'Client',
+    exp: Date.now() + CUSTOMER_SESSION_DURATION_MS
+  };
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function verifyCustomerToken(tokenStr) {
+  if (!tokenStr || typeof tokenStr !== 'string' || !tokenStr.includes('.')) return null;
+  const [body, sig] = tokenStr.split('.');
+  if (!body || !sig) return null;
+  const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url');
+  if (sig !== expectedSig) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    if (Date.now() > payload.exp) return null;
+    return payload;
+  } catch (err) {
+    return null;
+  }
+}
 
 function verifyCustomer(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -715,13 +747,13 @@ function verifyCustomer(req, res, next) {
     return res.status(401).json({ success: false, error: 'Customer sign-in required' });
   }
   const token = authHeader.split(' ')[1];
-  const session = activeCustomerTokens.get(token);
-  if (!session || Date.now() > session.expiresAt) {
-    activeCustomerTokens.delete(token);
+  const payload = verifyCustomerToken(token);
+  if (!payload) {
     return res.status(401).json({ success: false, error: 'Session expired. Please log in again.' });
   }
-  req.customerId = session.id;
-  req.customerEmail = session.email;
+  req.customerId = payload.id;
+  req.customerEmail = payload.email;
+  req.customerName = payload.name;
   next();
 }
 
@@ -744,7 +776,7 @@ app.post('/api/customer/register', async (req, res) => {
       name: name.trim(),
       email: cleanEmail,
       phone: (phone || '').trim(),
-      password: password.trim(), // In production, password hash is stored
+      password: password.trim(),
       address: (address || '').trim(),
       city: (city || '').trim(),
       state: (state || '').trim(),
@@ -754,14 +786,7 @@ app.post('/api/customer/register', async (req, res) => {
     };
 
     await db.createCustomer(newCustomer);
-
-    // Issue session token
-    const token = crypto.randomBytes(32).toString('hex');
-    activeCustomerTokens.set(token, {
-      id: newCustomer.id,
-      email: newCustomer.email,
-      expiresAt: Date.now() + CUSTOMER_SESSION_DURATION_MS
-    });
+    const token = createCustomerToken(newCustomer);
 
     const { password: _, ...customerSafe } = newCustomer;
     res.status(201).json({
@@ -790,12 +815,7 @@ app.post('/api/customer/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid email or password.' });
     }
 
-    const token = crypto.randomBytes(32).toString('hex');
-    activeCustomerTokens.set(token, {
-      id: customer.id,
-      email: customer.email,
-      expiresAt: Date.now() + CUSTOMER_SESSION_DURATION_MS
-    });
+    const token = createCustomerToken(customer);
 
     const { password: _, ...customerSafe } = customer;
     res.json({
@@ -814,16 +834,28 @@ app.post('/api/customer/login', async (req, res) => {
 app.get('/api/customer/me', verifyCustomer, async (req, res) => {
   try {
     const customers = await db.getAllCustomers();
-    const customer = customers.find(c => c.id === req.customerId);
+    let customer = customers.find(c => c.id === req.customerId || (c.email && c.email.toLowerCase() === req.customerEmail.toLowerCase()));
+    
     if (!customer) {
-      return res.status(404).json({ success: false, error: 'Customer not found' });
+      // Fallback object from valid token
+      customer = {
+        id: req.customerId,
+        name: req.customerName || 'Client',
+        email: req.customerEmail,
+        phone: '',
+        orders: []
+      };
     }
 
     const allOrders = await db.getAllOrders();
-    const myOrders = allOrders.filter(o => 
-      (o.customer && o.customer.email && o.customer.email.toLowerCase() === req.customerEmail.toLowerCase()) ||
-      (customer.orders && customer.orders.includes(o.id))
-    );
+    const myOrders = allOrders.filter(o => {
+      const emailMatch = o.customer && o.customer.email && o.customer.email.toLowerCase() === req.customerEmail.toLowerCase();
+      const phoneClean = customer.phone ? customer.phone.replace(/\D/g, '') : '';
+      const orderPhoneClean = (o.customer && o.customer.phone) ? o.customer.phone.replace(/\D/g, '') : '';
+      const phoneMatch = phoneClean && orderPhoneClean && (phoneClean === orderPhoneClean || phoneClean.endsWith(orderPhoneClean) || orderPhoneClean.endsWith(phoneClean));
+      const explicitMatch = customer.orders && customer.orders.includes(o.id);
+      return emailMatch || phoneMatch || explicitMatch;
+    });
 
     const { password: _, ...customerSafe } = customer;
     res.json({
@@ -832,6 +864,7 @@ app.get('/api/customer/me', verifyCustomer, async (req, res) => {
       orders: myOrders
     });
   } catch (err) {
+    console.error('Failed to retrieve customer profile:', err);
     res.status(500).json({ success: false, error: 'Failed to retrieve customer profile' });
   }
 });

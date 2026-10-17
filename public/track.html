@@ -169,15 +169,25 @@
     let activeTrackOrder = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Check customer session
+      // Check customer session with fast cache
+      const cachedCust = localStorage.getItem('aura3d_customer');
+      if (cachedCust) {
+        try {
+          const cust = JSON.parse(cachedCust);
+          const badge = document.getElementById('navUserBadge');
+          if (badge && cust.name) badge.textContent = `👤 ${cust.name.split(' ')[0]}`;
+        } catch (e) {}
+      }
+
       const token = localStorage.getItem('aura3d_customer_token');
       if (token) {
         fetch('/api/customer/me', { headers: { 'Authorization': `Bearer ${token}` } })
           .then(res => res.json())
           .then(data => {
             if (data.success && data.customer) {
+              localStorage.setItem('aura3d_customer', JSON.stringify(data.customer));
               const badge = document.getElementById('navUserBadge');
-              if (badge) badge.textContent = data.customer.name.split(' ')[0];
+              if (badge) badge.textContent = `👤 ${data.customer.name.split(' ')[0]}`;
             }
           }).catch(() => {});
       }

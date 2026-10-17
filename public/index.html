@@ -94,17 +94,17 @@
           <li><a href="#heroStage" class="nav-item-link active">Home</a></li>
           <li><a href="#catalog" class="nav-item-link">Store</a></li>
           <li><a href="/spares.html" class="nav-item-link">OEM Spares</a></li>
-          <li><a href="javascript:void(0)" onclick="openTrackModal()" class="nav-item-link">Track Order</a></li>
+          <li><a href="/track.html" class="nav-item-link">Track Order</a></li>
           <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
           <li><a href="#faq" class="nav-item-link">FAQ</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <button class="btn-nav-action" onclick="openCustomerModal()" id="navAccountBtn" aria-label="Customer Account Portal" style="display: inline-flex; align-items: center; gap: 6px;">
+        <a href="/account.html" class="btn-nav-action" id="navAccountBtn" aria-label="Customer Account Portal" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span id="navAccountLabel">Account</span>
-        </button>
+          <span id="navAccountLabel">Sign In / Account</span>
+        </a>
 
         <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20request%20technical%20assistance%20with%20systems%20or%20materials" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link" id="navWhatsappBtn">
           Direct Desk
@@ -135,8 +135,8 @@
         <li><a href="/" onclick="closeMobileNav()">Home</a></li>
         <li><a href="#catalog" onclick="closeMobileNav()">Store &amp; Catalog</a></li>
         <li><a href="/spares.html" onclick="closeMobileNav()">OEM Spares Registry</a></li>
-        <li><a href="javascript:void(0)" onclick="closeMobileNav(); openTrackModal()">Track Live Order</a></li>
-        <li><a href="javascript:void(0)" onclick="closeMobileNav(); openCustomerModal()">My Customer Account</a></li>
+        <li><a href="/track.html" onclick="closeMobileNav()">Track Live Delivery</a></li>
+        <li><a href="/account.html" id="mobileNavAccountLink" onclick="closeMobileNav()">My Customer Account &amp; Orders</a></li>
         <li><a href="/guides.html" onclick="closeMobileNav()">Technical Guides</a></li>
         <li><a href="#faq" onclick="closeMobileNav()">FAQ</a></li>
       </ul>

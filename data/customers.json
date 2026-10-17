@@ -58,5 +58,18 @@
       "AUR-2026-2692"
     ],
     "createdAt": "2026-10-17T10:42:17.209Z"
+  },
+  {
+    "id": "cust-1792243206549",
+    "name": "Manish Kumar Pankaj",
+    "email": "manishkumarpankaj119@gmail.com",
+    "phone": "9716236380",
+    "password": "123456",
+    "address": "H.NO. 768, D-Block, Qutub Vihar Ph-2",
+    "city": "Goyla Dairy",
+    "state": "Delhi",
+    "pincode": "110071",
+    "orders": [],
+    "createdAt": "2026-10-17T13:20:06.549Z"
   }
 ]

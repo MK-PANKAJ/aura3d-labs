@@ -32,13 +32,39 @@ async function initApp() {
     renderProducts(allProducts);
     updateCartBadge();
 
-    // Check for buyAgain parameter
+    // Check for buyAgain or openCart parameter
     const urlParams = new URLSearchParams(window.location.search);
     const buyAgainSku = urlParams.get('buyAgain');
+    const buyName = urlParams.get('name');
+    const buyPrice = urlParams.get('price');
+    const buyImg = urlParams.get('image');
+
     if (buyAgainSku) {
       setTimeout(() => {
-        addToCart(buyAgainSku);
-      }, 500);
+        const found = allProducts.find(p => p.id === buyAgainSku);
+        if (found) {
+          addToCart(buyAgainSku);
+        } else if (buyName && buyPrice) {
+          cart.push({
+            id: buyAgainSku,
+            name: decodeURIComponent(buyName),
+            price: Number(buyPrice),
+            image: buyImg ? decodeURIComponent(buyImg) : '',
+            qty: 1
+          });
+          saveCart();
+          updateCartBadge();
+          renderCartDrawer();
+          showToast(`Added ${decodeURIComponent(buyName)} to bag!`);
+          openCartDrawer();
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 350);
+    } else if (urlParams.get('openCart') === '1') {
+      setTimeout(() => {
+        openCartDrawer();
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 350);
     }
   } catch (err) {
     console.error('Failed to load products:', err);
@@ -863,24 +889,42 @@ function renderTrackingDetails(order) {
    Customer Portal & Account Session Management
    ========================================================================== */
 async function checkCustomerSession() {
+  // 1. Fast path from cached session
+  const cachedCust = localStorage.getItem('aura3d_customer');
+  if (cachedCust) {
+    try {
+      currentCustomer = JSON.parse(cachedCust);
+      updateCustomerNavBadge();
+    } catch (e) {}
+  }
+
   const token = localStorage.getItem('aura3d_customer_token');
-  if (!token) return;
+  if (!token) {
+    updateCustomerNavBadge();
+    return;
+  }
 
   try {
     const res = await fetch('/api/customer/me', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) {
+    if (res.status === 401) {
       localStorage.removeItem('aura3d_customer_token');
+      localStorage.removeItem('aura3d_customer');
+      currentCustomer = null;
+      updateCustomerNavBadge();
       return;
     }
+    if (!res.ok) return;
+
     const data = await res.json();
     if (data.success && data.customer) {
       currentCustomer = data.customer;
+      localStorage.setItem('aura3d_customer', JSON.stringify(data.customer));
       updateCustomerNavBadge();
     }
   } catch (err) {
-    // network failure
+    // network failure - keep cached customer session!
   }
 }
 
@@ -888,30 +932,25 @@ function updateCustomerNavBadge() {
   const label = document.getElementById('navAccountLabel');
   if (label && currentCustomer) {
     const firstName = currentCustomer.name.split(' ')[0] || 'Client';
-    label.textContent = firstName;
+    label.textContent = `👤 ${firstName}`;
+    label.style.color = 'var(--color-champagne)';
   } else if (label) {
-    label.textContent = 'Account';
+    label.textContent = 'Sign In / Account';
+    label.style.color = '';
+  }
+  const mobileLink = document.getElementById('mobileNavAccountLink');
+  if (mobileLink && currentCustomer) {
+    const firstName = currentCustomer.name.split(' ')[0] || 'Client';
+    mobileLink.textContent = `👤 ${firstName}'s Account & Orders`;
   }
 }
 
 function openCustomerModal() {
-  const modal = document.getElementById('customerModal');
-  if (!modal) return;
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-
-  if (currentCustomer) {
-    renderCustomerDashboard();
-  } else {
-    document.getElementById('customerAuthView').style.display = 'block';
-    document.getElementById('customerDashboardView').style.display = 'none';
-  }
+  window.location.href = '/account.html';
 }
 
-function closeCustomerModal() {
-  const modal = document.getElementById('customerModal');
-  if (modal) modal.classList.remove('open');
-  document.body.style.overflow = '';
+function openTrackModal() {
+  window.location.href = '/track.html';
 }
 
 function switchCustomerAuthTab(tab) {

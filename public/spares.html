@@ -73,16 +73,16 @@
           <li><a href="/" class="nav-item-link">Overview</a></li>
           <li><a href="/#catalog" class="nav-item-link">Store</a></li>
           <li><a href="/spares.html" class="nav-item-link active">OEM Spares</a></li>
-          <li><a href="/#track" class="nav-item-link">Track Order</a></li>
+          <li><a href="/track.html" class="nav-item-link">Track Order</a></li>
           <li><a href="/guides.html" class="nav-item-link">Guides</a></li>
           <li><a href="/#faq" class="nav-item-link">FAQ</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <a href="/#account" class="btn-nav-action" aria-label="Customer Account Portal" style="display: inline-flex; align-items: center; gap: 6px;">
+        <a href="/account.html" class="btn-nav-action" id="navAccountBtn" aria-label="Customer Account Portal" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span>Account</span>
+          <span id="navAccountLabel">Sign In / Account</span>
         </a>
 
         <a href="https://wa.me/919599523434?text=Hi%20Aura3D%20Labs%2C%20I%20am%20looking%20for%20a%20specific%20spare%20part" target="_blank" rel="noopener" class="btn-nav-action nav-whatsapp-link">
@@ -278,6 +278,23 @@
         renderSpares(sparesProducts.filter(p => p.type.includes('Board') || p.type.includes('IoT') || p.name.includes('WiFi') || p.name.includes('Motherboard')));
       }
     }
+    // Global Auth Nav Sync
+    (function syncAuthNav() {
+      try {
+        const cached = localStorage.getItem('aura3d_customer');
+        if (cached) {
+          const cust = JSON.parse(cached);
+          if (cust && cust.name) {
+            const firstName = cust.name.split(' ')[0] || 'Client';
+            const label = document.getElementById('navAccountLabel');
+            if (label) {
+              label.textContent = `👤 ${firstName}`;
+              label.style.color = 'var(--color-champagne)';
+            }
+          }
+        }
+      } catch (e) {}
+    })();
     document.addEventListener('DOMContentLoaded', loadSpares);
   </script>
 </body>
